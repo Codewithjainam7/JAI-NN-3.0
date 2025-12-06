@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>JAI-NN 2.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -59,7 +58,7 @@
         background-color: #000;
         color: #fff;
         -webkit-font-smoothing: antialiased;
-        overscroll-behavior: none;
+        overscroll-behavior: none; /* Prevent rubber banding */
       }
       
       /* Custom Scrollbar */
@@ -90,28 +89,19 @@
       }
       
       .glass-panel {
-        background: rgba(20, 20, 20, 0.5);
+        background: rgba(20, 20, 20, 0.7);
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
         border: 1px solid rgba(255, 255, 255, 0.08);
       }
       
-      /* Image Based Text Pattern - Abstract Blue/Purple Liquid */
+      /* Image Based Text Pattern - Colorful Abstract */
       .img-pattern-bg {
-        background-image: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1964&auto=format&fit=crop'); 
+        background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop'); 
         background-size: 200% auto;
         -webkit-background-clip: text;
         background-clip: text;
         color: transparent;
-      }
-      
-      /* iOS Scrollbar */
-      .ios-scrollbar::-webkit-scrollbar {
-        width: 4px;
-      }
-      .ios-scrollbar::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
       }
     </style>
   <script type="importmap">
@@ -125,7 +115,10 @@
     "react": "https://aistudiocdn.com/react@^19.2.1",
     "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
     "react-syntax-highlighter/": "https://aistudiocdn.com/react-syntax-highlighter@^16.1.0/",
-    "react-syntax-highlighter": "https://aistudiocdn.com/react-syntax-highlighter@^16.1.0"
+    "react-syntax-highlighter": "https://aistudiocdn.com/react-syntax-highlighter@^16.1.0",
+    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.39.7",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
+    "vite": "https://aistudiocdn.com/vite@^7.2.6"
   }
 }
 </script>
