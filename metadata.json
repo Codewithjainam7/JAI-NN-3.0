@@ -1,0 +1,7 @@
+{
+  "name": "JAI-NN 2.0",
+  "description": "A modern AI assistant with iOS-style glassmorphism design, advanced code editing, and multi-model capabilities.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
