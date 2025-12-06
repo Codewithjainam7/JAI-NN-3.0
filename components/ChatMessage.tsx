@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -36,20 +35,19 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate,
 
   return (
     <div className={`group flex w-full mb-6 ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`flex flex-col w-full max-w-[85%] ${isUser ? 'items-end' : 'items-start'}`}>
+      <div className={`flex flex-col w-full ${isUser ? 'max-w-[85%] items-end' : 'max-w-[90%] items-start'}`}>
           <div 
             className={`
-              relative px-5 py-4 overflow-hidden
+              relative px-5 py-4 w-full break-words
               ${isUser 
-                ? 'text-white rounded-[24px] rounded-br-md shadow-lg overflow-y-auto custom-scrollbar border border-white/5' 
-                : 'glass-panel text-gray-100 rounded-[24px] rounded-bl-md border border-white/5'
+                ? 'text-white rounded-[24px] rounded-br-md shadow-lg border border-white/5' 
+                : 'bg-black/20 backdrop-blur-3xl text-gray-100 rounded-[24px] rounded-bl-md border border-white/[0.08]'
               }
               animate-fade-in
             `}
             style={{
                backgroundColor: isUser ? accentColor : undefined,
                boxShadow: isUser ? `0 8px 32px -8px ${accentColor}60` : undefined,
-               maxHeight: isUser ? '400px' : undefined // Limit height of user bubble
             }}
           >
             {/* Model Icon for AI messages */}
@@ -123,21 +121,23 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate,
           
           {/* Action Bar (AI Only) */}
           {!isUser && !message.isThinking && (
-              <div className="flex items-center gap-2 mt-2 ml-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
-                  <button onClick={handleCopyAll} className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors" title="Copy">
+              <div className="flex items-center gap-2 mt-3 ml-1 bg-black/40 backdrop-blur-md rounded-xl px-3 py-2 border border-white/10 w-fit opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300">
+                  <button onClick={handleCopyAll} className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors" title="Copy">
                       {isCopied ? <Icon name="check" size={14} /> : <Icon name="copy" size={14} />}
                   </button>
-                  <button onClick={onRegenerate} className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors" title="Regenerate">
+                  <div className="w-px h-3 bg-white/10"></div>
+                  <button onClick={onRegenerate} className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors" title="Regenerate">
                       <Icon name="refresh" size={14} />
                   </button>
-                   <button onClick={handleDownload} className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors" title="Download">
+                  <div className="w-px h-3 bg-white/10"></div>
+                   <button onClick={handleDownload} className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors" title="Download">
                       <Icon name="download" size={14} />
                   </button>
-                  <div className="w-px h-3 bg-white/10 mx-1"></div>
-                  <button className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors">
+                  <div className="w-px h-3 bg-white/10"></div>
+                  <button className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors" title="Like">
                       <Icon name="thumbs-up" size={14} />
                   </button>
-                  <button className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors">
+                  <button className="p-1.5 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors" title="Dislike">
                       <Icon name="thumbs-down" size={14} />
                   </button>
               </div>
