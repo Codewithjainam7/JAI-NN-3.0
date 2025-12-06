@@ -33,7 +33,7 @@
               'slide-up': 'slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
               'fade-in': 'fadeIn 0.2s ease-out',
               'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'text-pan': 'textPan 20s linear infinite',
+              'text-pan': 'textPan 8s linear infinite',
             },
             keyframes: {
               slideUp: {
@@ -77,27 +77,37 @@
         background: rgba(255, 255, 255, 0.25);
       }
 
-      /* Liquid Glass Utility */
+      /* Enhanced Liquid Glass Utility - Subtle Iridescence */
       .liquid-glass {
-        background: rgba(255, 255, 255, 0.02);
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(24px) saturate(200%);
+        -webkit-backdrop-filter: blur(24px) saturate(200%);
+        border: 1px solid rgba(255, 255, 255, 0.12);
         box-shadow: 
-          inset 0 1px 0 rgba(255, 255, 255, 0.1),
+          inset 0 0 20px rgba(255, 255, 255, 0.02),
           0 8px 32px rgba(0, 0, 0, 0.4);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .liquid-glass::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        opacity: 0.5;
       }
       
       .glass-panel {
-        background: rgba(20, 20, 20, 0.7);
+        background: rgba(20, 20, 20, 0.6);
         backdrop-filter: blur(20px) saturate(180%);
         -webkit-backdrop-filter: blur(20px) saturate(180%);
         border: 1px solid rgba(255, 255, 255, 0.08);
       }
       
-      /* Image Based Text Pattern - Colorful Abstract */
+      /* Image Based Text Pattern - High Contrast Abstract */
       .img-pattern-bg {
-        background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2070&auto=format&fit=crop'); 
+        background-image: url('https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?q=80&w=2574&auto=format&fit=crop'); 
         background-size: 200% auto;
         -webkit-background-clip: text;
         background-clip: text;

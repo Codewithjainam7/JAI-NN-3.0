@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Message, ModelId, Tier, UserSettings, ChatSession, User, Page } from './types';
 import { ChatMessage } from './components/ChatMessage';
@@ -302,7 +303,8 @@ const App: React.FC = () => {
     return <PricingPage onBack={() => setCurrentPage('landing')} onSelectTier={() => setCurrentPage('landing')} />;
   }
 
-  // --- CHAT LAYOUT ---
+  // --- CHAT LAYOUT: STRICT FLEXBOX SANDWICH ---
+  // The outer container must be fixed height 100dvh (dynamic viewport height) to allow inner scrolling
   return (
     <div className="fixed inset-0 w-full h-[100dvh] bg-black text-white font-sans flex overflow-hidden">
       
@@ -322,22 +324,23 @@ const App: React.FC = () => {
         onRenameSession={handleRenameSession}
       />
 
-      {/* Main Content Area - Strict Flexbox Containment */}
+      {/* Main Content Area - Strict Vertical Stack */}
       <div className="flex-1 bg-black relative h-full flex flex-col min-w-0">
           
-          {/* Centered Column Wrapper */}
-          <div className="w-full max-w-4xl mx-auto h-full flex flex-col border-x border-white/5 bg-black shadow-2xl shadow-black">
+          {/* Centered Max-Width Wrapper for Alignment */}
+          <div className="w-full max-w-4xl mx-auto h-full flex flex-col border-x border-white/5 bg-black shadow-2xl shadow-black relative">
 
-            {/* Header */}
+            {/* 1. HEADER (Fixed Height) - Applied Liquid Glass */}
             <header className="flex-none h-14 md:h-16 flex items-center justify-between px-4 bg-black/80 backdrop-blur-md border-b border-white/5 z-20">
                 <div className="flex items-center gap-3">
                     <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 -ml-2 text-white/70 hover:text-white rounded-lg active:bg-white/10 transition-colors">
                         <Icon name="panel-left" size={24} />
                     </button>
                     
+                    {/* Model Selector Button - Liquid Glass */}
                     <button 
                     onClick={() => setModelSelectorOpen(true)}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full liquid-glass hover:bg-white/10 transition-all active:scale-95 group"
+                    className="flex items-center gap-2 px-4 py-1.5 rounded-full liquid-glass hover:bg-white/10 transition-all active:scale-95 group shadow-lg"
                     >
                         <span className="text-sm group-hover:scale-110 transition-transform">{currentModelInfo?.icon}</span>
                         <span className="text-sm font-medium text-white/90 truncate max-w-[120px]">{currentModelInfo?.name}</span>
@@ -346,19 +349,20 @@ const App: React.FC = () => {
                 </div>
                 
                 <div className="flex items-center gap-3">
+                    {/* User Profile Button - Liquid Glass */}
                     {user ? (
-                        <button onClick={() => setSettingsOpen(true)} className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold border border-white/20 liquid-glass shadow-lg">
+                        <button onClick={() => setSettingsOpen(true)} className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold border border-white/20 liquid-glass shadow-lg transition-transform hover:scale-105">
                             {user.name.charAt(0)}
                         </button>
                     ) : (
-                        <button onClick={() => setLoginOpen(true)} className="liquid-glass rounded-full text-xs font-bold text-white/90 hover:text-white px-4 py-2 hover:bg-white/10 transition-colors">
+                        <button onClick={() => setLoginOpen(true)} className="liquid-glass rounded-full text-xs font-bold text-white/90 hover:text-white px-5 py-2 hover:bg-white/10 transition-colors shadow-lg">
                             Log In
                         </button>
                     )}
                 </div>
             </header>
 
-            {/* Messages Area - Flexible with scrolling */}
+            {/* 2. MESSAGES AREA (Flex-1, min-h-0 for scrolling) */}
             <div className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar relative">
                 <div className="min-h-full w-full px-4 py-6 flex flex-col">
                     {messages.length === 0 ? (
@@ -388,7 +392,7 @@ const App: React.FC = () => {
                 </div>
             </div>
 
-            {/* Input Area - Fixed height content */}
+            {/* 3. INPUT AREA (Fixed Height Content) */}
             <div className="flex-none w-full bg-black z-20 pb-safe px-4 border-t border-white/5 pt-4">
                 <InputArea 
                     onSend={handleSend} 

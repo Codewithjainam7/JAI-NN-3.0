@@ -53,11 +53,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
           <div className="absolute bottom-[-10%] left-[-5%] w-[500px] md:w-[800px] h-[500px] md:h-[800px] bg-purple-900/10 rounded-full blur-[100px] md:blur-[150px]"></div>
       </div>
 
-      {/* Responsive Navbar - Liquid Glass */}
+      {/* Responsive Navbar - Liquid Glass Enhanced */}
       <nav className="fixed top-4 left-0 right-0 z-50 px-6 md:px-12 max-w-7xl mx-auto pointer-events-none flex items-center justify-between">
         
         {/* Logo */}
-        <div className="pointer-events-auto liquid-glass rounded-full px-5 py-2.5 flex items-center gap-3 shadow-lg">
+        <div className="pointer-events-auto liquid-glass rounded-full px-5 py-2.5 flex items-center gap-3 shadow-2xl backdrop-blur-xl">
            <div className="text-blue-500">
              <Icon name="logo" size={24} />
            </div>
@@ -65,21 +65,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
         </div>
 
         {/* Desktop Menu */}
-        <div className="hidden md:flex pointer-events-auto items-center gap-1 px-3 py-2 rounded-full liquid-glass shadow-lg text-sm font-medium text-white/70">
-            <button onClick={() => scrollToSection('features')} className="px-4 py-2 rounded-full hover:bg-white/10 hover:text-white transition-colors">Features</button>
-            <button onClick={() => scrollToSection('new')} className="px-4 py-2 rounded-full hover:bg-white/10 hover:text-white transition-colors">What's New</button>
-            <button onClick={() => onNavigate('creator')} className="px-4 py-2 rounded-full hover:bg-white/10 hover:text-white transition-colors">Creator</button>
-            <button onClick={() => onNavigate('pricing')} className="px-4 py-2 rounded-full hover:bg-white/10 hover:text-white transition-colors">Pricing</button>
+        <div className="hidden md:flex pointer-events-auto items-center gap-1 px-2 py-1.5 rounded-full liquid-glass shadow-2xl backdrop-blur-xl text-sm font-medium text-white/70">
+            <button onClick={() => scrollToSection('features')} className="px-5 py-2.5 rounded-full hover:bg-white/10 hover:text-white transition-colors">Features</button>
+            <button onClick={() => scrollToSection('new')} className="px-5 py-2.5 rounded-full hover:bg-white/10 hover:text-white transition-colors">What's New</button>
+            <button onClick={() => onNavigate('creator')} className="px-5 py-2.5 rounded-full hover:bg-white/10 hover:text-white transition-colors">Creator</button>
+            <button onClick={() => onNavigate('pricing')} className="px-5 py-2.5 rounded-full hover:bg-white/10 hover:text-white transition-colors">Pricing</button>
         </div>
 
         {/* Right Actions & Mobile Toggle */}
         <div className="flex items-center gap-3 pointer-events-auto">
-             <a href={CREATOR_INFO.github} target="_blank" rel="noreferrer" className="hidden sm:flex p-2.5 rounded-full liquid-glass hover:bg-white/10 transition-colors">
+             <a href={CREATOR_INFO.github} target="_blank" rel="noreferrer" className="hidden sm:flex p-3 rounded-full liquid-glass hover:bg-white/10 transition-colors shadow-lg">
                 <Icon name="github" size={20} />
             </a>
              <button 
                 onClick={onEnter}
-                className="hidden sm:flex px-6 py-2.5 rounded-full bg-white text-black text-sm font-bold hover:bg-white/90 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+                className="hidden sm:flex px-6 py-3 rounded-full bg-white text-black text-sm font-bold hover:bg-white/90 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)]"
              >
                 Launch App
              </button>
@@ -87,7 +87,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
              {/* Mobile Menu Toggle */}
              <button 
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-3 rounded-full liquid-glass text-white hover:bg-white/10 transition-colors"
+                className="md:hidden p-3 rounded-full liquid-glass text-white hover:bg-white/10 transition-colors shadow-lg"
              >
                  <Icon name={mobileMenuOpen ? 'x' : 'menu'} size={20} />
              </button>
@@ -96,7 +96,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-          <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl pt-24 px-6 flex flex-col items-center space-y-6 md:hidden animate-fade-in">
+          <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl pt-28 px-6 flex flex-col items-center space-y-6 md:hidden animate-fade-in">
               <button onClick={() => scrollToSection('features')} className="text-2xl font-bold text-white">Features</button>
               <button onClick={() => scrollToSection('new')} className="text-2xl font-bold text-white">What's New</button>
               <button onClick={() => {onNavigate('creator'); setMobileMenuOpen(false);}} className="text-2xl font-bold text-white">Creator</button>
@@ -109,18 +109,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
       {/* Hero Section */}
       <section className="relative z-10 pt-32 pb-20 px-6 flex flex-col items-center text-center max-w-5xl mx-auto min-h-[90vh] justify-center">
          <div ref={addToObserver} className="mb-8 opacity-0 transition-all duration-300">
-             <span className="px-4 py-1.5 rounded-full liquid-glass text-xs font-mono text-blue-300 shadow-lg shadow-blue-500/10">
+             <span className="px-4 py-1.5 rounded-full liquid-glass text-xs font-mono text-blue-300 shadow-lg shadow-blue-500/10 border border-blue-500/20">
                  JAI-NN 2.0 IS LIVE
              </span>
          </div>
          
-         {/* Reverted to Image Pattern Background Text Mask */}
+         {/* Dynamic Text Animation: Highlight A & I, Scrolling texture on rest */}
          <h1 ref={addToObserver} className="text-5xl md:text-7xl lg:text-9xl font-bold tracking-tighter mb-10 leading-none opacity-0 transition-all duration-300 delay-75">
-             <span className="img-pattern-bg bg-clip-text text-transparent bg-center animate-text-pan pb-4 block drop-shadow-2xl">
-                 Artificial
-                 <br />
-                 Intelligence.
-             </span>
+             <div className="flex flex-col md:block">
+               <span className="inline-block">
+                 <span className="text-blue-500 drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">A</span>
+                 <span className="img-pattern-bg bg-clip-text text-transparent bg-center animate-text-pan">rtificial</span>
+               </span>
+               <span className="hidden md:inline">&nbsp;</span>
+               <span className="inline-block">
+                 <span className="text-blue-500 drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">I</span>
+                 <span className="img-pattern-bg bg-clip-text text-transparent bg-center animate-text-pan">ntelligence.</span>
+               </span>
+             </div>
          </h1>
          
          <div ref={addToObserver} className="max-w-xl text-lg text-white/50 mb-12 font-light leading-relaxed relative mx-auto opacity-0 transition-all duration-300 delay-100">
@@ -148,7 +154,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
          </div>
       </section>
 
-      {/* What's New Section - Image Gen Highlight */}
+      {/* What's New Section */}
       <section id="new" className="relative z-10 py-16 px-6">
           <div ref={addToObserver} className="max-w-5xl mx-auto liquid-glass rounded-[40px] p-8 md:p-12 border border-blue-500/20 shadow-2xl shadow-blue-900/10 opacity-0 transition-all duration-300 hover:scale-[1.01]">
               <div className="flex flex-col md:flex-row items-center gap-12">
@@ -186,7 +192,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
           </div>
       </section>
       
-      {/* Features Grid */}
+      {/* Features Grid - Added New Features */}
       <section id="features" className="relative z-10 py-24 px-6 md:px-12 bg-black/50 border-t border-white/5 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto">
               <h2 ref={addToObserver} className="text-3xl md:text-5xl font-bold mb-16 text-center opacity-0 transition-all duration-300">
@@ -194,7 +200,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {/* Features - Liquid Glass Applied */}
+                  {/* Core Features */}
                   <FeatureCard 
                      icon="mic" color="blue" title="Voice Mode 2.0" 
                      desc="Hands-free interaction. JAI-NN listens and responds with natural language processing." 
@@ -218,14 +224,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
                      addToObserver={addToObserver} delay={0.15}
                   />
                    <FeatureCard 
-                     icon="users" color="pink" title="Team Sync" 
-                     desc="Collaborate on prompts and share sessions with your team seamlessly." 
+                     icon="users" color="pink" title="Real-time Sync" 
+                     desc="Collaborate on prompts and share sessions with your team seamlessly across devices." 
                      addToObserver={addToObserver} delay={0.2}
                   />
                   <FeatureCard 
                      icon="globe" color="teal" title="Web Analysis" 
                      desc="JAI-NN can browse the live web to fetch real-time data and citations." 
                      addToObserver={addToObserver} delay={0.25}
+                  />
+
+                  {/* New Added Features per request */}
+                  <FeatureCard 
+                     icon="zap" color="yellow" title="Lightning Latency" 
+                     desc="Powered by Gemini Flash 2.5 for near-instant responses on any device." 
+                     addToObserver={addToObserver} delay={0.3}
+                  />
+                  <FeatureCard 
+                     icon="shield" color="indigo" title="Enterprise Guard" 
+                     desc="SOC2 compliant data handling with custom retention policies for Ultra users." 
+                     addToObserver={addToObserver} delay={0.35}
+                  />
+                   <FeatureCard 
+                     icon="download" color="gray" title="Multi-Format Export" 
+                     desc="Export your chats to PDF, Markdown, or JSON with a single click." 
+                     addToObserver={addToObserver} delay={0.4}
                   />
               </div>
           </div>
@@ -254,7 +277,7 @@ const FeatureCard = ({ icon, color, title, desc, addToObserver, delay = 0 }: any
         className="liquid-glass p-8 rounded-[32px] opacity-0 transition-all hover:-translate-y-2 duration-300 group shadow-lg shadow-black/20"
         style={{ transitionDelay: `${delay}s` }}
     >
-        <div className={`w-14 h-14 rounded-2xl bg-${color}-500/10 group-hover:bg-${color}-500/20 flex items-center justify-center mb-6 text-${color}-400 transition-colors border border-${color}-500/20`}>
+        <div className={`w-14 h-14 rounded-2xl bg-${color}-500/10 group-hover:bg-${color}-500/20 flex items-center justify-center mb-6 text-${color}-400 transition-colors border border-${color}-500/20 shadow-lg shadow-${color}-500/5`}>
             <Icon name={icon} size={28} />
         </div>
         <h3 className="text-xl font-bold mb-3 text-white">{title}</h3>

@@ -41,7 +41,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate,
             className={`
               relative px-5 py-4 overflow-hidden
               ${isUser 
-                ? 'text-white rounded-[24px] rounded-br-md shadow-lg overflow-y-auto custom-scrollbar border border-white/5' 
+                ? 'text-white rounded-[24px] rounded-br-md shadow-lg custom-scrollbar border border-white/5' 
                 : 'glass-panel text-gray-100 rounded-[24px] rounded-bl-md border border-white/5'
               }
               animate-fade-in
@@ -49,7 +49,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate,
             style={{
                backgroundColor: isUser ? accentColor : undefined,
                boxShadow: isUser ? `0 8px 32px -8px ${accentColor}60` : undefined,
-               maxHeight: isUser ? '400px' : undefined // Limit height of user bubble
+               maxHeight: isUser ? '300px' : undefined, // STRICT LIMIT on user messages
+               overflowY: isUser ? 'auto' : undefined
             }}
           >
             {/* Model Icon for AI messages */}
