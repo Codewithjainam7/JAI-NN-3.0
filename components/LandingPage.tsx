@@ -114,7 +114,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
              </span>
          </div>
          
-         {/* Dynamic Text Animation: Highlight A & I, Scrolling texture on rest */}
+         {/* Dynamic Text Animation */}
          <h1 ref={addToObserver} className="text-5xl md:text-7xl lg:text-9xl font-bold tracking-tighter mb-10 leading-none opacity-0 transition-all duration-300 delay-75">
              <div className="flex flex-col md:block">
                <span className="inline-block">
@@ -154,41 +154,62 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
          </div>
       </section>
 
-      {/* What's New Section */}
+      {/* What's New Section with Multiple Mock Images */}
       <section id="new" className="relative z-10 py-16 px-6">
-          <div ref={addToObserver} className="max-w-5xl mx-auto liquid-glass rounded-[40px] p-8 md:p-12 border border-blue-500/20 shadow-2xl shadow-blue-900/10 opacity-0 transition-all duration-300 hover:scale-[1.01]">
-              <div className="flex flex-col md:flex-row items-center gap-12">
-                  <div className="flex-1 text-left">
-                      <div className="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold mb-4 border border-blue-500/30">
+          <div ref={addToObserver} className="max-w-7xl mx-auto liquid-glass rounded-[40px] p-8 md:p-12 border border-blue-500/20 shadow-2xl shadow-blue-900/10 opacity-0 transition-all duration-300">
+              <div className="text-center mb-12">
+                   <div className="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold mb-4 border border-blue-500/30">
                           NEW FEATURE
-                      </div>
-                      <h2 className="text-4xl md:text-5xl font-bold mb-6">
-                          Imagine Anything.
-                          <br/>
-                          <span className="text-blue-500">Instantly.</span>
-                      </h2>
-                      <p className="text-white/60 text-lg leading-relaxed mb-8">
+                   </div>
+                   <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                          Imagine Anything. <span className="text-blue-500">Instantly.</span>
+                   </h2>
+                   <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto">
                           JAI-NN now features a powerful visual engine. Just type 
                           <code className="bg-white/10 px-2 py-0.5 rounded mx-1 text-white border border-white/10">/imagine</code> 
-                          followed by your prompt to generate stunning artwork, diagrams, and concepts in seconds.
-                      </p>
-                      <button onClick={onEnter} className="flex items-center gap-2 text-white font-semibold hover:text-blue-400 transition-colors group">
-                          Try Image Generation <Icon name="send" size={16} className="group-hover:translate-x-1 transition-transform" />
-                      </button>
-                  </div>
+                          to generate stunning artwork in seconds.
+                   </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {/* Mock Image 1 */}
                   <div className="flex-1 w-full relative">
-                      <div className="aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
-                          <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600 opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                              <Icon name="image" size={64} className="text-white/20" />
-                          </div>
-                          <div className="absolute bottom-4 left-4 right-4 liquid-glass p-4 rounded-xl">
+                      <div className="aspect-video md:aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
+                          <img 
+                            src="https://image.pollinations.ai/prompt/A%20futuristic%20glass%20city%20in%20the%20clouds,%20cyberpunk%20style,%20blue%20and%20purple%20lighting?width=1024&height=1024&nologo=true"
+                            alt="City Gen"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 group-hover:opacity-90 transition-opacity"></div>
+                          <div className="absolute bottom-4 left-4 right-4 liquid-glass p-4 rounded-xl backdrop-blur-md">
                               <div className="text-xs text-white/50 mb-1">Prompt</div>
                               <div className="text-sm text-white font-medium">"A futuristic glass city in the clouds, cyberpunk style, blue and purple lighting"</div>
                           </div>
                       </div>
                   </div>
+
+                   {/* Mock Image 2 */}
+                  <div className="flex-1 w-full relative">
+                      <div className="aspect-video md:aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
+                          <img 
+                            src="https://image.pollinations.ai/prompt/Hyper%20realistic%20close%20up%20of%20a%20mechanical%20cybernetic%20eye,%20glowing%20blue%20iris,%20intricate%20metal%20details,%20dark%20background?width=1024&height=1024&nologo=true"
+                            alt="Eye Gen"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 group-hover:opacity-90 transition-opacity"></div>
+                          <div className="absolute bottom-4 left-4 right-4 liquid-glass p-4 rounded-xl backdrop-blur-md">
+                              <div className="text-xs text-white/50 mb-1">Prompt</div>
+                              <div className="text-sm text-white font-medium">"Hyper realistic close up of a mechanical cybernetic eye, glowing blue iris, intricate metal details"</div>
+                          </div>
+                      </div>
+                  </div>
               </div>
+              
+               <div className="mt-12 text-center">
+                    <button onClick={onEnter} className="px-8 py-3 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold transition-all group">
+                          Try Generation Now <Icon name="send" size={16} className="inline ml-2 group-hover:translate-x-1 transition-transform" />
+                    </button>
+               </div>
           </div>
       </section>
       
