@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Message, ModelId, Tier, UserSettings, ChatSession, User, Page } from './types';
 import { ChatMessage } from './components/ChatMessage';
@@ -82,6 +81,18 @@ const App: React.FC = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isGenerating]);
+  
+  // Load user from localStorage on mount
+  useEffect(() => {
+    const savedUser = localStorage.getItem('jainn_user');
+    if (savedUser) {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (e) {
+        console.error('Error loading user:', e);
+      }
+    }
+  }, []);
 
   // Sync messages
   useEffect(() => {
@@ -104,13 +115,21 @@ const App: React.FC = () => {
 
   // --- Handlers ---
   const handleAuth = () => {
-      setUser({
+      const userData = {
           id: '123',
           name: 'Jainam User',
           email: 'user@example.com',
           avatar: ''
-      });
+      };
+      setUser(userData);
+      localStorage.setItem('jainn_user', JSON.stringify(userData));
       setLoginOpen(false);
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('jainn_user');
+    setCurrentPage('landing');
   };
 
   const createNewChat = () => {
@@ -272,6 +291,8 @@ const App: React.FC = () => {
         onHome={() => setCurrentPage('landing')}
         onDeleteSession={handleDeleteSession}
         onRenameSession={handleRenameSession}
+        onLogout={handleLogout}
+        user={user}
       />
 
       {/* Main Content Area - Strict Flexbox Containment */}
@@ -299,9 +320,34 @@ const App: React.FC = () => {
                 
                 <div className="flex items-center gap-3">
                     {user ? (
-                        <button onClick={() => setSettingsOpen(true)} className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold border border-white/20 liquid-glass shadow-lg">
-                            {user.name.charAt(0)}
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <div className="hidden md:flex flex-col items-end mr-1">
+                                <span className="text-xs font-medium text-white/90 leading-tight">{user.name}</span>
+                                <span className="text-[9px] text-white/40 leading-tight">{user.email}</span>
+                            </div>
+                            <div className="relative group">
+                                <button className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-xs font-bold border border-white/20 liquid-glass shadow-lg hover:scale-110 transition-transform">
+                                    {user.name.charAt(0)}
+                                </button>
+                                <div className="absolute top-full right-0 mt-2 w-40 py-1 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 shadow-2xl z-50">
+                                    <button 
+                                        onClick={() => setSettingsOpen(true)}
+                                        className="w-full px-4 py-2 text-left text-xs text-white/70 hover:bg-white/5 hover:text-white flex items-center gap-2 transition-colors"
+                                    >
+                                        <Icon name="settings" size={12} />
+                                        Settings
+                                    </button>
+                                    <div className="h-px bg-white/10 my-1"></div>
+                                    <button 
+                                        onClick={handleLogout}
+                                        className="w-full px-4 py-2 text-left text-xs text-red-400 hover:bg-red-500/10 flex items-center gap-2 transition-colors"
+                                    >
+                                        <Icon name="x" size={12} />
+                                        Sign Out
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     ) : (
                         <button onClick={() => setLoginOpen(true)} className="liquid-glass rounded-full text-xs font-bold text-white/90 hover:text-white px-4 py-2 hover:bg-white/10 transition-colors">
                             Log In
@@ -312,7 +358,7 @@ const App: React.FC = () => {
 
             {/* Messages Area - Flexible with scrolling */}
             <div className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar relative">
-                <div className="min-h-full w-full px-4 py-6 flex flex-col">
+                <div className="max-w-4xl mx-auto w-full px-4 py-6 flex flex-col min-h-full">
                     {messages.length === 0 ? (
                     <div className="flex-1 flex flex-col items-center justify-center text-center opacity-60 min-h-[50vh]">
                         <div className="w-20 h-20 mb-6 rounded-3xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-white/10 shadow-2xl animate-fade-in">
