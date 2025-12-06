@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { Icon } from './Icon';
-import { ChatSession, Tier } from '../types';
+import { ChatSession, Tier, User } from '../types';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -16,6 +15,8 @@ interface SidebarProps {
   onHome: () => void;
   onDeleteSession: (id: string) => void;
   onRenameSession: (id: string, newTitle: string) => void;
+  onLogout: () => void;
+  user: User | null;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -30,7 +31,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onCloseMobile,
   onHome,
   onDeleteSession,
-  onRenameSession
+  onRenameSession,
+  onLogout,
+  user
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -176,6 +179,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
             {/* Bottom Actions */}
             <div className="mt-auto pt-4 space-y-2 border-t border-white/10">
+                 {user && (
+                     <button 
+                        onClick={() => {
+                            onLogout();
+                            if(window.innerWidth < 768) onCloseMobile();
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-red-500/10 text-red-400 hover:text-red-300 transition-colors text-sm font-medium border border-red-500/20"
+                     >
+                        <Icon name="x" size={18} />
+                        Sign Out
+                     </button>
+                 )}
                  <button 
                    onClick={() => {
                        onSettingsOpen();
