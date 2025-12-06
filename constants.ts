@@ -7,7 +7,8 @@ export const CREATOR_INFO = {
   description: "A visionary developer pursuing the path of an AI Generalist. Creator of JAI-NN, creating bridges between human creativity and artificial intelligence.",
   github: "https://github.com/Codewithjainam7",
   website: "https://jainamjain.netlify.app",
-  social: "@Codewithjainam7"
+  social: "@Codewithjainam7",
+  avatar: "https://github.com/Codewithjainam7.png" // Auto-fetches your GitHub profile picture
 };
 
 export const MODELS: ModelConfig[] = [

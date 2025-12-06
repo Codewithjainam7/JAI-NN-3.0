@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -33,7 +34,7 @@
               'slide-up': 'slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1)',
               'fade-in': 'fadeIn 0.2s ease-out',
               'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'text-pan': 'textPan 15s linear infinite',
+              'text-pan': 'textPan 20s linear infinite',
             },
             keyframes: {
               slideUp: {
@@ -77,15 +78,15 @@
         background: rgba(255, 255, 255, 0.25);
       }
 
-      /* Enhanced Liquid Glass Utility - Subtle Iridescence */
+      /* Enhanced Liquid Glass Utility */
       .liquid-glass {
-        background: rgba(255, 255, 255, 0.03);
-        backdrop-filter: blur(24px) saturate(200%);
-        -webkit-backdrop-filter: blur(24px) saturate(200%);
-        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(40px) saturate(220%);
+        -webkit-backdrop-filter: blur(40px) saturate(220%);
+        border: 1px solid rgba(255, 255, 255, 0.15);
         box-shadow: 
-          inset 0 0 20px rgba(255, 255, 255, 0.02),
-          0 8px 32px rgba(0, 0, 0, 0.4);
+          inset 0 0 30px rgba(255, 255, 255, 0.05),
+          0 10px 40px rgba(0, 0, 0, 0.5);
         position: relative;
         overflow: hidden;
       }
@@ -94,21 +95,23 @@
         content: '';
         position: absolute;
         top: 0; left: 0; right: 0; height: 1px;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-        opacity: 0.5;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+        opacity: 0.7;
       }
+
+      /* Removed shimmering hover line effect per user request */
       
       .glass-panel {
-        background: rgba(20, 20, 20, 0.6);
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(20, 20, 20, 0.7);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
       }
       
-      /* Image Based Text Pattern - Geometric Blue Shades */
+      /* Image Based Text Pattern - Colorful Abstract */
       .img-pattern-bg {
-        /* Using a high-res abstract geometric blue pattern */
-        background-image: url('https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?q=80&w=2670&auto=format&fit=crop'); 
+        /* High-res colorful abstract texture */
+        background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop'); 
         background-size: 200% auto;
         -webkit-background-clip: text;
         background-clip: text;

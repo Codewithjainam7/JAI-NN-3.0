@@ -235,7 +235,9 @@ const App: React.FC = () => {
 
         setTimeout(() => {
             const prompt = text.replace('/imagine ', '');
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true`;
+            // Append random seed to prevent caching
+            const seed = Math.floor(Math.random() * 100000);
+            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${seed}`;
             const aiMsg: Message = { 
                 id: (Date.now() + 1).toString(), 
                 role: 'model', 

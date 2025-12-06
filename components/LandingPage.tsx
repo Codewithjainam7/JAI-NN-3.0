@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import { Icon } from './Icon';
 import { CREATOR_INFO } from '../constants';
 
@@ -7,6 +7,34 @@ interface LandingPageProps {
   onEnter: () => void;
   onNavigate: (page: 'landing' | 'creator' | 'pricing') => void;
 }
+
+const IMAGE_PROMPTS = [
+  "A futuristic glass city in the clouds, cyberpunk style, blue and purple lighting",
+  "Hyper realistic close up of a mechanical cybernetic eye, glowing blue iris, intricate metal details",
+  "A sleek white robot playing chess against a human in a modern minimalist room",
+  "Neon lit rainy street in Tokyo at night, reflection in puddles, cinematic",
+  "Abstract data visualization, glowing nodes and connections, dark background, 3d render",
+  "A astronaut floating in a nebula, colorful space dust, highly detailed",
+  "Macro shot of a computer chip with glowing circuits",
+  "A majestic lion made of blue crystals and light",
+  "Cyberpunk street food vendor, steam, neon lights, detailed",
+  "A floating island with a waterfall in the sky, fantasy art",
+  "Futuristic electric car speeding through a tunnel of light",
+  "A wise old owl wearing steampunk goggles, digital art",
+  "A beautiful landscape of a red planet with two moons",
+  "A underwater city with bioluminescent plants and sea creatures",
+  "A minimalist architectural render of a glass house in a forest",
+  "A close up of a human eye reflecting a galaxy",
+  "A dragon made of smoke and fire, epic fantasy",
+  "A futuristic laboratory with glowing green liquids",
+  "A cyberpunk samurai warrior with a glowing katana",
+  "A serene zen garden with floating rocks and cherry blossoms",
+  "A retro wave sunset over a grid landscape, synthwave style",
+  "A detailed diagram of a complex machine, blueprint style",
+  "A magical library with flying books and glowing dust",
+  "A portrait of a cyborg woman with porcelain skin and gold accents",
+  "A massive spaceship docking at a space station"
+];
 
 const useIntersectionObserver = (options = {}) => {
     const elementsRef = useRef<HTMLElement[]>([]);
@@ -37,6 +65,12 @@ const useIntersectionObserver = (options = {}) => {
 export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate }) => {
   const addToObserver = useIntersectionObserver({ threshold: 0.1 });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Select 2 random unique prompts on mount
+  const randomPrompts = useMemo(() => {
+    const shuffled = [...IMAGE_PROMPTS].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, 2);
+  }, []);
 
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
@@ -94,15 +128,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
         </div>
       </nav>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu Dropdown - Liquid Glassmorphism */}
       {mobileMenuOpen && (
-          <div className="fixed inset-0 z-40 bg-black/95 backdrop-blur-xl pt-28 px-6 flex flex-col items-center space-y-6 md:hidden animate-fade-in">
-              <button onClick={() => scrollToSection('features')} className="text-2xl font-bold text-white">Features</button>
-              <button onClick={() => scrollToSection('new')} className="text-2xl font-bold text-white">What's New</button>
-              <button onClick={() => {onNavigate('creator'); setMobileMenuOpen(false);}} className="text-2xl font-bold text-white">Creator</button>
-              <button onClick={() => {onNavigate('pricing'); setMobileMenuOpen(false);}} className="text-2xl font-bold text-white">Pricing</button>
-              <div className="w-16 h-px bg-white/20 my-4"></div>
-              <button onClick={onEnter} className="px-8 py-3 rounded-full bg-white text-black font-bold text-lg">Launch Chat</button>
+          <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-[50px] saturate-150 pt-28 px-6 flex flex-col items-center space-y-6 md:hidden animate-fade-in border-b border-white/5">
+              <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 to-transparent pointer-events-none"></div>
+              <button onClick={() => scrollToSection('features')} className="text-2xl font-bold text-white relative z-10">Features</button>
+              <button onClick={() => scrollToSection('new')} className="text-2xl font-bold text-white relative z-10">What's New</button>
+              <button onClick={() => {onNavigate('creator'); setMobileMenuOpen(false);}} className="text-2xl font-bold text-white relative z-10">Creator</button>
+              <button onClick={() => {onNavigate('pricing'); setMobileMenuOpen(false);}} className="text-2xl font-bold text-white relative z-10">Pricing</button>
+              <div className="w-16 h-px bg-white/20 my-4 relative z-10"></div>
+              <button onClick={onEnter} className="px-8 py-3 rounded-full bg-white text-black font-bold text-lg relative z-10">Launch Chat</button>
           </div>
       )}
 
@@ -114,18 +149,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
              </span>
          </div>
          
-         {/* Dynamic Text Animation */}
+         {/* Dynamic Text Animation - Unified Text Style */}
          <h1 ref={addToObserver} className="text-5xl md:text-7xl lg:text-9xl font-bold tracking-tighter mb-10 leading-none opacity-0 transition-all duration-300 delay-75">
-             <div className="flex flex-col md:block">
-               <span className="inline-block">
-                 <span className="text-blue-500 drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">A</span>
-                 <span className="img-pattern-bg bg-clip-text text-transparent bg-center animate-text-pan">rtificial</span>
-               </span>
-               <span className="hidden md:inline">&nbsp;</span>
-               <span className="inline-block">
-                 <span className="text-blue-500 drop-shadow-[0_0_30px_rgba(59,130,246,0.5)]">I</span>
-                 <span className="img-pattern-bg bg-clip-text text-transparent bg-center animate-text-pan">ntelligence.</span>
-               </span>
+             <div className="inline-block">
+                 <span className="img-pattern-bg bg-clip-text text-transparent bg-center animate-text-pan pb-4">
+                     Artificial Intelligence.
+                 </span>
              </div>
          </h1>
          
@@ -154,52 +183,52 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
          </div>
       </section>
 
-      {/* What's New Section with Multiple Mock Images */}
+      {/* What's New Section with RANDOM MOCK IMAGES */}
       <section id="new" className="relative z-10 py-16 px-6">
-          <div ref={addToObserver} className="max-w-7xl mx-auto liquid-glass rounded-[40px] p-8 md:p-12 border border-blue-500/20 shadow-2xl shadow-blue-900/10 opacity-0 transition-all duration-300">
+          <div ref={addToObserver} className="max-w-7xl mx-auto liquid-glass rounded-[40px] p-6 md:p-12 border border-blue-500/20 shadow-2xl shadow-blue-900/10 opacity-0 transition-all duration-300">
               <div className="text-center mb-12">
                    <div className="inline-block px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-bold mb-4 border border-blue-500/30">
                           NEW FEATURE
                    </div>
-                   <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                   <h2 className="text-3xl md:text-5xl font-bold mb-4">
                           Imagine Anything. <span className="text-blue-500">Instantly.</span>
                    </h2>
-                   <p className="text-white/60 text-lg leading-relaxed max-w-2xl mx-auto">
+                   <p className="text-white/60 text-base md:text-lg leading-relaxed max-w-2xl mx-auto">
                           JAI-NN now features a powerful visual engine. Just type 
                           <code className="bg-white/10 px-2 py-0.5 rounded mx-1 text-white border border-white/10">/imagine</code> 
                           to generate stunning artwork in seconds.
                    </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Mock Image 1 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
+                  {/* Random Mock Image 1 */}
                   <div className="flex-1 w-full relative">
-                      <div className="aspect-video md:aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
+                      <div className="aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
                           <img 
-                            src="https://image.pollinations.ai/prompt/A%20futuristic%20glass%20city%20in%20the%20clouds,%20cyberpunk%20style,%20blue%20and%20purple%20lighting?width=1024&height=1024&nologo=true"
-                            alt="City Gen"
+                            src={`https://image.pollinations.ai/prompt/${encodeURIComponent(randomPrompts[0])}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 1000)}`}
+                            alt="Random Generation 1"
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 group-hover:opacity-90 transition-opacity"></div>
-                          <div className="absolute bottom-4 left-4 right-4 liquid-glass p-4 rounded-xl backdrop-blur-md">
+                          <div className="absolute bottom-4 left-4 right-4 liquid-glass p-3 md:p-4 rounded-xl backdrop-blur-md">
                               <div className="text-xs text-white/50 mb-1">Prompt</div>
-                              <div className="text-sm text-white font-medium">"A futuristic glass city in the clouds, cyberpunk style, blue and purple lighting"</div>
+                              <div className="text-sm text-white font-medium line-clamp-2">"{randomPrompts[0]}"</div>
                           </div>
                       </div>
                   </div>
 
-                   {/* Mock Image 2 */}
+                   {/* Random Mock Image 2 */}
                   <div className="flex-1 w-full relative">
-                      <div className="aspect-video md:aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
+                      <div className="aspect-square rounded-3xl overflow-hidden border border-white/10 shadow-2xl relative group">
                           <img 
-                            src="https://image.pollinations.ai/prompt/Hyper%20realistic%20close%20up%20of%20a%20mechanical%20cybernetic%20eye,%20glowing%20blue%20iris,%20intricate%20metal%20details,%20dark%20background?width=1024&height=1024&nologo=true"
-                            alt="Eye Gen"
+                            src={`https://image.pollinations.ai/prompt/${encodeURIComponent(randomPrompts[1])}?width=1024&height=1024&nologo=true&seed=${Math.floor(Math.random() * 1000) + 1}`}
+                            alt="Random Generation 2"
                             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100 group-hover:opacity-90 transition-opacity"></div>
-                          <div className="absolute bottom-4 left-4 right-4 liquid-glass p-4 rounded-xl backdrop-blur-md">
+                          <div className="absolute bottom-4 left-4 right-4 liquid-glass p-3 md:p-4 rounded-xl backdrop-blur-md">
                               <div className="text-xs text-white/50 mb-1">Prompt</div>
-                              <div className="text-sm text-white font-medium">"Hyper realistic close up of a mechanical cybernetic eye, glowing blue iris, intricate metal details"</div>
+                              <div className="text-sm text-white font-medium line-clamp-2">"{randomPrompts[1]}"</div>
                           </div>
                       </div>
                   </div>
@@ -245,13 +274,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
                      addToObserver={addToObserver} delay={0.15}
                   />
                    <FeatureCard 
-                     icon="users" color="pink" title="Real-time Sync" 
+                     icon="users" color="pink" title="Team Nexus" 
                      desc="Collaborate on prompts and share sessions with your team seamlessly across devices." 
                      addToObserver={addToObserver} delay={0.2}
                   />
                   <FeatureCard 
-                     icon="globe" color="teal" title="Web Analysis" 
-                     desc="JAI-NN can browse the live web to fetch real-time data and citations." 
+                     icon="globe" color="teal" title="Deep Insights" 
+                     desc="JAI-NN can browse the live web to fetch real-time data and analyze complex datasets." 
                      addToObserver={addToObserver} delay={0.25}
                   />
 
@@ -267,8 +296,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
                      addToObserver={addToObserver} delay={0.35}
                   />
                    <FeatureCard 
-                     icon="download" color="gray" title="Multi-Format Export" 
-                     desc="Export your chats to PDF, Markdown, or JSON with a single click." 
+                     icon="download" color="gray" title="Universal Export" 
+                     desc="Export your chats to PDF, Markdown, JSON, or Docx with a single click." 
                      addToObserver={addToObserver} delay={0.4}
                   />
               </div>
