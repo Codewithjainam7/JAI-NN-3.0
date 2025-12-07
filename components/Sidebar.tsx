@@ -18,6 +18,7 @@ interface SidebarProps {
   onRenameSession: (id: string, newTitle: string) => void;
   user: User | null;
   onSignOut: () => void;
+  isGuest: boolean;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ 
@@ -34,7 +35,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onDeleteSession,
   onRenameSession,
   user,
-  onSignOut
+  onSignOut,
+  isGuest
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -80,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="flex items-center justify-between mb-8 px-2 pt-2">
             <div className="flex items-center gap-3">
               <JAINNLogo size={32} />
-              <h1 className="font-semibold text-lg tracking-tight text-white">JAI-NN 3.0</h1>
+              <h1 className="font-semibold text-lg text-white">JAI-NN 3.0</h1>
             </div>
             
             <button onClick={onCloseMobile} className="md:hidden p-2 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors active:scale-95">
@@ -106,9 +108,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
 
           <div className="flex-1 overflow-y-auto -mx-2 px-2">
-            <div className="text-xs font-medium text-white/40 px-4 mb-2 uppercase tracking-wider sticky top-0 bg-black/90 backdrop-blur-sm py-1 z-10">History</div>
-            <div className="space-y-0.5">
-              {sessions.length === 0 ? (
+            <div className="text-xs font-medium text-white/40 px-4 mb-2 uppercase sticky top-0 bg-black/90 backdrop-blur-sm py-1 z-10">
+              {isGuest ? 'Current Session' : 'History'}
+            </div>
+            <div className="space-y-1">
+              {isGuest ? (
+                <div className="px-4 py-8 text-center">
+                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white/5 flex items-center justify-center text-white/20">
+                    <Icon name="lock" size={20} />
+                  </div>
+                  <p className="text-sm text-white/40 mb-2">Sign in to save chat history</p>
+                </div>
+              ) : sessions.length === 0 ? (
                 <div className="px-4 py-8 text-center">
                   <div className="w-12 h-12 mx-auto mb-2 rounded-full bg-white/5 flex items-center justify-center text-white/20">
                     <Icon name="menu" size={20} />
@@ -136,18 +147,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             onSelectSession(session.id);
                             if(window.innerWidth < 768) onCloseMobile();
                           }}
-                          className={`w-full text-left px-4 py-3 rounded-xl text-sm truncate transition-all duration-200 relative ${
+                          className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 relative ${
                             currentSessionId === session.id 
                               ? 'bg-white/10 text-white font-medium shadow-md shadow-black/20' 
                               : 'hover:bg-white/5 text-white/60 hover:text-white/90'
                           }`}
                         >
-                          <span className="relative block truncate pr-10">
+                          <span className="block truncate pr-10">
                             {session.title || 'Untitled Chat'}
                           </span>
                         </button>
 
-                        {/* FIXED: Visible three-dot menu button */}
                         <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
                           <button 
                             onClick={(e) => {
@@ -164,7 +174,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
                             </svg>
                           </button>
 
-                          {/* Action Menu Dropdown */}
                           {actionMenuId === session.id && (
                             <div className="absolute right-0 top-full mt-1 bg-black/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-1 min-w-[140px] z-20">
                               <button 
@@ -202,10 +211,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-white/60 hover:text-white transition-colors text-sm font-medium active:scale-95"
             >
               <Icon name="settings" size={18} />
-              Settings
+              {isGuest ? 'Sign In to Access Settings' : 'Settings'}
             </button>
             
-            {user && user.id !== 'guest' && (
+            {user && !isGuest && (
               <button 
                 onClick={() => {
                   if(window.confirm('Sign out from JAI-NN 3.0?')) {
@@ -227,7 +236,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-white/10 hover:border-white/20 transition-all group shadow-lg shadow-blue-900/10 active:scale-95"
             >
               <div className="flex flex-col text-left">
-                <span className="text-[10px] text-white/50 uppercase tracking-wider font-semibold">Current Plan</span>
+                <span className="text-[10px] text-white/50 uppercase font-semibold">Current Plan</span>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-bold text-white group-hover:text-blue-200 transition-colors">{currentTier}</span>
                   {currentTier === Tier.Free && (
