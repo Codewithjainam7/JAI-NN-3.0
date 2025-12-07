@@ -8,156 +8,240 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         darkMode: 'class',
         theme: {
           extend: {
             fontFamily: {
-              sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-              mono: ['JetBrains Mono', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+              sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Segoe UI', 'Roboto', 'sans-serif'],
             },
             colors: {
-              oled: '#050505',
-              brand: {
-                500: '#6366f1',
-                400: '#818cf8',
-                glow: 'rgba(99, 102, 241, 0.5)'
-              },
-              emerald: {
-                500: '#10b981',
-                glow: 'rgba(16, 185, 129, 0.5)'
+              ios: {
+                bg: '#000000',
+                card: 'rgba(255, 255, 255, 0.08)',
+                border: 'rgba(255, 255, 255, 0.12)',
+                text: '#ffffff',
+                'text-secondary': 'rgba(255, 255, 255, 0.6)',
+                blue: '#007AFF',
+                teal: '#5AC8FA',
+                purple: '#AF52DE',
+                pink: '#FF2D55',
+                green: '#34C759',
               }
             },
+            backgroundImage: {
+              'ios-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+              'ios-mesh': 'radial-gradient(at 40% 20%, hsla(240, 100%, 70%, 0.3) 0px, transparent 50%), radial-gradient(at 80% 0%, hsla(189, 100%, 56%, 0.3) 0px, transparent 50%), radial-gradient(at 0% 50%, hsla(355, 100%, 93%, 0.3) 0px, transparent 50%)',
+            },
             animation: {
-              'slide-up': 'slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1)',
-              'fade-in': 'fadeIn 0.4s ease-out',
-              'pulse-slow': 'pulse 8s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'blob-drift': 'drift 20s infinite alternate',
-              'text-pan': 'textPan 8s linear infinite',
-              'scan': 'scan 3s linear infinite',
-              'spin-reverse': 'spinReverse 10s linear infinite',
-              'blink': 'blink 1s step-end infinite',
+              'float': 'float 6s ease-in-out infinite',
+              'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+              'fade-in': 'fadeIn 0.3s ease-out',
+              'scale-in': 'scaleIn 0.2s ease-out',
+              'shimmer': 'shimmer 2s infinite',
+              'glow-pulse': 'glowPulse 3s ease-in-out infinite',
             },
             keyframes: {
+              float: {
+                '0%, 100%': { transform: 'translateY(0px)' },
+                '50%': { transform: 'translateY(-20px)' },
+              },
               slideUp: {
-                '0%': { transform: 'translateY(20px)', opacity: '0' },
+                '0%': { transform: 'translateY(10px)', opacity: '0' },
                 '100%': { transform: 'translateY(0)', opacity: '1' },
               },
               fadeIn: {
                 '0%': { opacity: '0' },
                 '100%': { opacity: '1' },
               },
-              drift: {
-                '0%': { transform: 'translate(0, 0) scale(1)' },
-                '100%': { transform: 'translate(30px, -30px) scale(1.1)' },
+              scaleIn: {
+                '0%': { transform: 'scale(0.95)', opacity: '0' },
+                '100%': { transform: 'scale(1)', opacity: '1' },
               },
-              textPan: {
-                '0%': { backgroundPosition: '0% 50%' },
-                '100%': { backgroundPosition: '100% 50%' },
+              shimmer: {
+                '0%': { backgroundPosition: '-200% 0' },
+                '100%': { backgroundPosition: '200% 0' },
               },
-              scan: {
-                '0%': { top: '-10%', opacity: '0' },
-                '50%': { opacity: '1' },
-                '100%': { top: '110%', opacity: '0' },
+              glowPulse: {
+                '0%, 100%': { opacity: '0.5', transform: 'scale(1)' },
+                '50%': { opacity: '0.8', transform: 'scale(1.05)' },
               },
-              spinReverse: {
-                '0%': { transform: 'rotate(360deg)' },
-                '100%': { transform: 'rotate(0deg)' },
-              },
-              blink: {
-                '0%, 100%': { opacity: '1' },
-                '50%': { opacity: '0' },
-              }
+            },
+            backdropBlur: {
+              'xl': '40px',
+              '2xl': '60px',
             }
           },
         },
       }
     </script>
     <style>
-      :root {
-        --cursor-size: 20px;
-        --cursor-ring-size: 40px;
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
       }
 
       body {
-        background-color: #000000;
-        color: #f1f5f9;
+        background: #000000;
+        color: #ffffff;
         overflow-x: hidden;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', sans-serif;
       }
-      
-      /* Aurora Blobs */
-      .aurora-container {
+
+      /* iOS Glass Morphism */
+      .ios-glass {
+        background: rgba(28, 28, 30, 0.72);
+        backdrop-filter: saturate(180%) blur(20px);
+        -webkit-backdrop-filter: saturate(180%) blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .ios-glass-light {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: saturate(180%) blur(30px);
+        -webkit-backdrop-filter: saturate(180%) blur(30px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+      }
+
+      .ios-card {
+        background: rgba(30, 30, 30, 0.85);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      /* iOS Gradient Mesh Background */
+      .ios-mesh-bg {
         position: fixed;
         inset: 0;
-        z-index: -10;
-        pointer-events: none;
-        overflow: hidden;
+        z-index: -1;
         background: #000;
+        overflow: hidden;
       }
-      .aurora-blob {
+
+      .mesh-gradient {
         position: absolute;
         border-radius: 50%;
-        filter: blur(140px);
-        opacity: 0.3;
-        mix-blend-mode: screen;
-        animation: drift 20s infinite alternate;
+        filter: blur(100px);
+        opacity: 0.4;
+        animation: float 8s ease-in-out infinite;
       }
 
-      /* Smoked Glass */
-      .smoked-glass {
-        background: rgba(15, 15, 20, 0.7);
-        backdrop-filter: blur(24px) saturate(140%);
-        -webkit-backdrop-filter: blur(24px) saturate(140%);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      .mesh-1 {
+        width: 500px;
+        height: 500px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        top: -10%;
+        left: -10%;
+        animation-delay: 0s;
       }
 
-      .liquid-glass-nav {
-         background: rgba(5, 5, 5, 0.4);
-         backdrop-filter: blur(20px) saturate(180%);
-         -webkit-backdrop-filter: blur(20px) saturate(180%);
-         border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      .mesh-2 {
+        width: 400px;
+        height: 400px;
+        background: linear-gradient(135deg, #5AC8FA 0%, #007AFF 100%);
+        bottom: -10%;
+        right: -10%;
+        animation-delay: -2s;
       }
 
-      /* Evolution Text Cyber Animation - FIXED */
-      .text-cyber-evolution {
-        background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop');
-        background-size: 200% auto;
-        background-clip: text;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        animation: textPan 10s linear infinite;
-        display: inline-block;
-        filter: brightness(1.2) contrast(1.1);
-      }
-      
-      /* Scrollbar */
-      ::-webkit-scrollbar { width: 6px; }
-      ::-webkit-scrollbar-track { background: #000; }
-      ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-      ::-webkit-scrollbar-thumb:hover { background: #555; }
-
-      /* iOS Scrollbar */
-      .ios-scrollbar {
-        scrollbar-width: thin;
-        scrollbar-color: #333 transparent;
+      .mesh-3 {
+        width: 350px;
+        height: 350px;
+        background: linear-gradient(135deg, #FF2D55 0%, #AF52DE 100%);
+        top: 40%;
+        right: 20%;
+        animation-delay: -4s;
       }
 
-      .ios-scrollbar::-webkit-scrollbar {
-        width: 4px;
+      /* Smooth Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
       }
 
-      .ios-scrollbar::-webkit-scrollbar-track {
+      ::-webkit-scrollbar-track {
         background: transparent;
       }
 
-      .ios-scrollbar::-webkit-scrollbar-thumb {
-        background: #333;
-        border-radius: 2px;
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      /* iOS Button Effects */
+      .ios-button {
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .ios-button:active {
+        transform: scale(0.96);
+        opacity: 0.8;
+      }
+
+      /* iOS Haptic Feedback Simulation */
+      @keyframes haptic {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(0.98); }
+      }
+
+      .haptic-feedback:active {
+        animation: haptic 0.1s ease-in-out;
+      }
+
+      /* Gradient Text */
+      .gradient-text {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        background-size: 200% auto;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        animation: shimmer 3s linear infinite;
+      }
+
+      /* Ensure content doesn't overflow */
+      .chat-container {
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+
+      .prose {
+        max-width: 100%;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      .prose pre {
+        max-width: 100%;
+        overflow-x: auto;
+      }
+
+      .prose img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      /* iOS Input Style */
+      input, textarea {
+        -webkit-appearance: none;
+        appearance: none;
+      }
+
+      /* Prevent text overflow */
+      * {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
       }
     </style>
 <script type="importmap">
@@ -179,10 +263,10 @@
 </script>
 </head>
   <body>
-    <div class="aurora-container">
-       <div class="aurora-blob bg-indigo-900" style="top: -20%; left: -10%; width: 80vw; height: 80vw;"></div>
-       <div class="aurora-blob bg-purple-900" style="bottom: -20%; right: -10%; width: 70vw; height: 70vw; animation-delay: -5s;"></div>
-       <div class="aurora-blob bg-emerald-900" style="top: 40%; left: 40%; width: 40vw; height: 40vw; animation-delay: -10s; opacity: 0.2;"></div>
+    <div class="ios-mesh-bg">
+       <div class="mesh-gradient mesh-1"></div>
+       <div class="mesh-gradient mesh-2"></div>
+       <div class="mesh-gradient mesh-3"></div>
     </div>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
