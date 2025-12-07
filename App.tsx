@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Message, ModelId, Tier, UserSettings, ChatSession, User, Page } from './types';
 import { ChatMessage } from './components/ChatMessage';
 import { InputArea } from './components/InputArea';
@@ -14,7 +14,6 @@ import { MODELS } from './constants';
 import { streamChatResponse } from './services/geminiService';
 import { signInWithGoogle, supabase, signOut } from './services/supabaseService';
 
-// iOS 26 Style Boot Sequence
 const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
   const [opacity, setOpacity] = useState(0);
   
@@ -34,7 +33,7 @@ const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
       <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse mb-2">
         JAI-NN 3.0
       </h1>
-      <div className="flex items-center gap-2 text-white/40 text-sm font-mono">
+      <div className="flex items-center gap-2 text-white/40 text-sm">
         <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
         <span>Initializing Neural Network...</span>
       </div>
@@ -69,6 +68,7 @@ const App: React.FC = () => {
   });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isGuest = user?.id === 'guest';
 
   useEffect(() => {
     if (supabase) {
@@ -141,7 +141,7 @@ const App: React.FC = () => {
   };
 
   const saveUserSettings = useCallback(async () => {
-    if (!supabase || !user) return;
+    if (!supabase || !user || isGuest) return;
     try {
       await supabase.from('user_settings').upsert({
         user_id: user.id,
@@ -153,10 +153,10 @@ const App: React.FC = () => {
     } catch (err) {
       console.error('Error saving settings:', err);
     }
-  }, [supabase, user, settings.dailyImageCount, settings.dailyTokenUsage, settings.tier]);
+  }, [supabase, user, isGuest, settings.dailyImageCount, settings.dailyTokenUsage, settings.tier]);
 
   const saveSession = useCallback(async (session: ChatSession) => {
-    if (!supabase || !user || user.id === 'guest') return;
+    if (!supabase || !user || isGuest) return;
     try {
       await supabase.from('chat_sessions').upsert({
         id: session.id,
@@ -168,7 +168,7 @@ const App: React.FC = () => {
     } catch (err) {
       console.error('Error saving session:', err);
     }
-  }, [supabase, user]);
+  }, [supabase, user, isGuest]);
 
   useEffect(() => { 
     if(messagesEndRef.current) {
@@ -177,7 +177,7 @@ const App: React.FC = () => {
   }, [messages, isGenerating]);
 
   useEffect(() => {
-    if (currentSessionId && messages.length > 0) {
+    if (currentSessionId && messages.length > 0 && !isGuest) {
       const updatedSession = {
         id: currentSessionId,
         title: messages[0].text.slice(0, 40) + (messages[0].text.length > 40 ? '...' : ''),
@@ -185,13 +185,13 @@ const App: React.FC = () => {
         updatedAt: Date.now()
       };
       setSessions(prev => prev.map(s => s.id === currentSessionId ? updatedSession : s));
-      if (user && user.id !== 'guest') saveSession(updatedSession);
+      saveSession(updatedSession);
     }
-  }, [messages, currentSessionId, user, saveSession]);
+  }, [messages, currentSessionId, isGuest, saveSession]);
 
   useEffect(() => {
-    if (user && user.id !== 'guest') saveUserSettings();
-  }, [settings.dailyImageCount, settings.dailyTokenUsage, user, saveUserSettings]);
+    if (user && !isGuest) saveUserSettings();
+  }, [settings.dailyImageCount, settings.dailyTokenUsage, user, isGuest, saveUserSettings]);
 
   const handleAuth = async () => {
     if (supabase) {
@@ -216,11 +216,10 @@ const App: React.FC = () => {
     setCurrentSessionId(newId);
     setMessages([]);
     setSidebarOpen(false);
-    if (user && user.id !== 'guest') saveSession(newSession);
+    if (!isGuest) saveSession(newSession);
   };
 
   const handleSend = async (text: string) => {
-    // FIXED: Proper image limit check
     const isImageRequest = text.startsWith('/imagine');
     
     if (isImageRequest) {
@@ -300,7 +299,7 @@ const App: React.FC = () => {
       />
       <LoginModal 
         isOpen={isLoginOpen} 
-        onClose={() => setLoginOpen(false)}
+        onClose={handleGuestMode}
         onLogin={handleAuth}
         onGuestMode={handleGuestMode}
       />
@@ -315,7 +314,7 @@ const App: React.FC = () => {
       
       <Sidebar 
         isOpen={isSidebarOpen} 
-        sessions={sessions} 
+        sessions={isGuest ? [] : sessions}
         currentSessionId={currentSessionId}
         onNewChat={createNewChat} 
         onSelectSession={(id) => { 
@@ -324,34 +323,40 @@ const App: React.FC = () => {
           setSidebarOpen(false);
         }}
         onPricingOpen={() => setPricingOpen(true)} 
-        onSettingsOpen={() => setSettingsOpen(true)}
+        onSettingsOpen={() => {
+          if (isGuest) {
+            setLoginOpen(true);
+          } else {
+            setSettingsOpen(true);
+          }
+        }}
         currentTier={settings.tier} 
         onCloseMobile={() => setSidebarOpen(false)} 
         onHome={() => setCurrentPage('landing')}
         onDeleteSession={async (id) => {
           setSessions(p => p.filter(s => s.id !== id));
-          if (supabase && user && user.id !== 'guest') {
+          if (supabase && !isGuest) {
             await supabase.from('chat_sessions').delete().eq('id', id);
           }
         }} 
         onRenameSession={async (id, newTitle) => {
           setSessions(p => p.map(s => s.id === id ? { ...s, title: newTitle } : s));
-          if (supabase && user && user.id !== 'guest') {
+          if (supabase && !isGuest) {
             await supabase.from('chat_sessions').update({ title: newTitle }).eq('id', id);
           }
         }}
         user={user}
         onSignOut={async () => {
-          if (supabase && user?.id !== 'guest') await signOut();
+          if (supabase && !isGuest) await signOut();
           setUser(null);
           setCurrentPage('landing');
         }}
+        isGuest={isGuest}
       />
 
       <div className="flex-1 bg-black relative h-full flex flex-col min-w-0 overflow-hidden">
         <div className="w-full h-full flex flex-col relative z-10">
           
-          {/* iOS 26 Style Header */}
           <header className="flex-none bg-black/60 backdrop-blur-2xl border-b border-white/10">
             <div className="flex items-center justify-between px-4 h-16 max-w-4xl mx-auto">
               <button 
@@ -375,7 +380,13 @@ const App: React.FC = () => {
                   <span className="text-xs font-medium hidden sm:inline">{MODELS.find(m=>m.id===settings.currentModel)?.name.split(' ')[1]}</span>
                 </button>
                 <button 
-                  onClick={() => setSettingsOpen(true)} 
+                  onClick={() => {
+                    if (isGuest) {
+                      setLoginOpen(true);
+                    } else {
+                      setSettingsOpen(true);
+                    }
+                  }}
                   className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-white/5 hover:bg-white/10 transition-all border border-white/10 active:scale-95"
                 >
                   {user?.avatar ? (
@@ -388,7 +399,6 @@ const App: React.FC = () => {
             </div>
           </header>
 
-          {/* Messages Area */}
           <div className="flex-1 min-h-0 w-full overflow-y-auto px-4 py-4 max-w-4xl mx-auto">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center">
@@ -409,7 +419,6 @@ const App: React.FC = () => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Input Area */}
           <div className="flex-none w-full p-3 pb-safe">
             <InputArea 
               onSend={handleSend} 
@@ -424,9 +433,34 @@ const App: React.FC = () => {
         </div>
       </div>
 
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setSettingsOpen(false)} settings={settings} onUpdateSettings={s => setSettings(p => ({...p, ...s}))} user={user} />
-      <ModelSelector isOpen={isModelSelectorOpen} onClose={() => setModelSelectorOpen(false)} currentModel={settings.currentModel} userTier={settings.tier} onSelect={id => setSettings(p => ({...p, currentModel: id}))} onUpgrade={() => setPricingOpen(true)} />
-      <PricingModal isOpen={isPricingOpen} onClose={() => setPricingOpen(false)} currentTier={settings.tier} />
+      {!isGuest && (
+        <SettingsModal 
+          isOpen={isSettingsOpen} 
+          onClose={() => setSettingsOpen(false)} 
+          settings={settings} 
+          onUpdateSettings={s => setSettings(p => ({...p, ...s}))} 
+          user={user} 
+        />
+      )}
+      <ModelSelector 
+        isOpen={isModelSelectorOpen} 
+        onClose={() => setModelSelectorOpen(false)} 
+        currentModel={settings.currentModel} 
+        userTier={settings.tier} 
+        onSelect={id => setSettings(p => ({...p, currentModel: id}))} 
+        onUpgrade={() => setPricingOpen(true)} 
+      />
+      <PricingModal 
+        isOpen={isPricingOpen} 
+        onClose={() => setPricingOpen(false)} 
+        currentTier={settings.tier} 
+      />
+      <LoginModal 
+        isOpen={isLoginOpen && currentPage === 'chat'} 
+        onClose={() => setLoginOpen(false)}
+        onLogin={handleAuth}
+        onGuestMode={() => setLoginOpen(false)}
+      />
     </div>
   );
 };
