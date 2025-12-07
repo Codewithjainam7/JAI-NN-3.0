@@ -1,4 +1,3 @@
-
 export type Role = 'user' | 'model';
 
 export type Page = 'landing' | 'chat' | 'creator' | 'pricing';
@@ -41,7 +40,7 @@ export interface ModelConfig {
   id: ModelId;
   name: string;
   description: string;
-  icon: string; // Emoji or SVG path
+  icon: string;
   tiers: Tier[];
 }
 
@@ -54,7 +53,6 @@ export interface UserSettings {
   dailyImageLimit: number;
   dailyTokenUsage: number;
   dailyTokenLimit: number;
-  // New Advanced Settings
   systemInstruction?: string;
   customStarters?: string[];
 }
