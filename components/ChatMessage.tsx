@@ -44,8 +44,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate,
   };
 
   return (
-    <div className={`group flex w-full ${isUser ? 'justify-end' : 'justify-start'} mb-6`}>
-      <div className={`flex flex-col w-full max-w-[95%] sm:max-w-[85%] md:max-w-[75%] ${isUser ? 'items-end' : 'items-start'}`}>
+    <div className={`group flex w-full ${isUser ? 'justify-end' : 'justify-start'} mb-6 px-1`}>
+      <div className={`flex flex-col w-full max-w-[92%] sm:max-w-[80%] md:max-w-[70%] ${isUser ? 'items-end' : 'items-start'}`}>
           
           <div className={`text-[9px] font-mono text-white/30 mb-2 px-2 flex items-center gap-2 uppercase tracking-widest`}>
               {isUser ? 'INPUT_STREAM' : 'SYSTEM_OUTPUT'}
