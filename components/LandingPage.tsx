@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useMemo } from 'react';
 import { Icon } from './Icon';
+import { JAINNLogo } from './JAINNLogo';
 import { TiltCard } from './TiltCard';
 
 interface LandingPageProps {
@@ -47,19 +48,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
   }, []);
 
   return (
-    <div className="min-h-screen w-full text-white font-sans selection:bg-indigo-500/30 overflow-x-hidden">
+    <div className="min-h-screen w-full text-white font-sans selection:bg-indigo-500/30 overflow-x-hidden bg-black">
       
-      <nav className="fixed top-0 left-0 right-0 z-50 liquid-glass-nav">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/60 backdrop-blur-2xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
-               <div className="text-indigo-500 animate-pulse-slow"><Icon name="logo" size={28} /></div>
+               <JAINNLogo size={32} />
                <span className="font-bold text-lg tracking-tight">JAI-NN 3.0</span>
             </div>
             
             <div className="flex items-center gap-6">
                  <button onClick={() => onNavigate('creator')} className="text-sm font-medium text-white/70 hover:text-white transition-colors tracking-wide hidden sm:block">CREATOR</button>
                  <button onClick={() => onNavigate('pricing')} className="text-sm font-medium text-white/70 hover:text-white transition-colors tracking-wide hidden sm:block">PRICING</button>
-                 <button onClick={onEnter} className="px-6 py-2.5 rounded-full bg-white text-black text-xs font-bold font-mono tracking-widest hover:bg-indigo-50 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)]">
+                 <button onClick={onEnter} className="px-6 py-2.5 rounded-full bg-white text-black text-xs font-bold font-mono tracking-widest hover:bg-indigo-50 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95">
                     TERMINAL_ACCESS
                  </button>
             </div>
@@ -73,12 +74,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
              </span>
          </div>
          
-         <h1 className="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 delay-100 text-5xl md:text-8xl font-bold tracking-tighter mb-6 text-center leading-[1.1]">
+         <div className="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 delay-100 mb-6">
+             <JAINNLogo size={120} animated />
+         </div>
+         
+         <h1 className="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 delay-200 text-5xl md:text-8xl font-bold tracking-tighter mb-6 text-center leading-[1.1]">
              Artificial Intelligence<br/>
-             <span className="text-cyber-evolution inline-block mt-2 pb-2">Evolution</span>
+             <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent inline-block mt-2 pb-2">Evolution</span>
          </h1>
          
-         <p className="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 delay-200 max-w-2xl text-center text-white/60 font-medium text-base leading-relaxed mb-12">
+         <p className="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 delay-300 max-w-2xl text-center text-white/60 font-medium text-base leading-relaxed mb-12">
              &gt; INITIATING NEURAL HANDSHAKE...<br/>
              &gt; ACCESSING QUANTUM LOGIC CORE.<br/>
              &gt; WELCOME TO THE NEXT GENERATION OF INTELLIGENCE.
@@ -86,7 +91,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
 
          <button 
             onClick={onEnter}
-            className="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 delay-300 group relative px-10 py-5 bg-transparent overflow-hidden rounded-full"
+            className="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 delay-400 group relative px-10 py-5 bg-transparent overflow-hidden rounded-full active:scale-95"
          >
              <div className="absolute inset-0 w-full h-full bg-indigo-600/20 group-hover:bg-indigo-600/40 transition-colors border border-indigo-500/50 rounded-full"></div>
              <div className="absolute inset-0 bg-indigo-500/20 blur-xl opacity-0 group-hover:opacity-50 transition-opacity"></div>
@@ -107,7 +112,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {FEATURE_CARDS.map((feature, i) => (
-                  <TiltCard key={i} className={`smoked-glass rounded-[2rem] p-8 animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 hover:border-white/30`} style={{ transitionDelay: `${i * 100}ms` }}>
+                  <TiltCard key={i} className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-8 animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 hover:border-white/30`} style={{ transitionDelay: `${i * 100}ms` }}>
                       <div className={`w-12 h-12 rounded-xl bg-${feature.color}-500/10 border border-${feature.color}-500/20 flex items-center justify-center mb-6 text-${feature.color}-400`}>
                           <Icon name={feature.icon as any} size={24} />
                       </div>
@@ -116,7 +121,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
                   </TiltCard>
               ))}
               
-              <TiltCard className="md:col-span-2 md:row-span-2 smoked-glass rounded-[2rem] p-1.5 overflow-hidden group animate-on-scroll opacity-0 translate-y-10">
+              <TiltCard className="md:col-span-2 md:row-span-2 bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2rem] p-1.5 overflow-hidden group animate-on-scroll opacity-0 translate-y-10">
                   <div className="relative h-full bg-black/40 rounded-[1.8rem] overflow-hidden min-h-[400px]">
                       <div className="absolute top-6 left-6 z-20 px-4 py-1.5 bg-black/60 backdrop-blur border border-white/10 rounded-full text-[10px] font-mono tracking-widest flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
