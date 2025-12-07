@@ -7,7 +7,7 @@
     <meta name="description" content="JAI-NN 3.0 - Next generation AI chatbot with advanced reasoning capabilities" />
     <meta name="theme-color" content="#000000" />
     
-    <!-- Favicon with Your Custom Logo -->
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200' fill='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%233B82F6'/%3E%3Cstop offset='50%25' style='stop-color:%238B5CF6'/%3E%3Cstop offset='100%25' style='stop-color:%23EC4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='100' cy='100' r='85' stroke='url(%23g)' stroke-width='8' fill='none' opacity='0.8'/%3E%3Ccircle cx='100' cy='50' r='12' fill='url(%23g)'/%3E%3Ccircle cx='140' cy='80' r='10' fill='url(%23g)'/%3E%3Ccircle cx='140' cy='120' r='10' fill='url(%23g)'/%3E%3Ccircle cx='100' cy='150' r='12' fill='url(%23g)'/%3E%3Ccircle cx='60' cy='120' r='10' fill='url(%23g)'/%3E%3Ccircle cx='60' cy='80' r='10' fill='url(%23g)'/%3E%3Ccircle cx='100' cy='100' r='20' fill='url(%23g)' opacity='0.3'/%3E%3Ccircle cx='100' cy='100' r='8' fill='url(%23g)'/%3E%3C/svg%3E" />
     
     <script src="https://cdn.tailwindcss.com"></script>
@@ -22,16 +22,15 @@
           extend: {
             fontFamily: {
               sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Segoe UI', 'Roboto', 'sans-serif'],
-              mono: ['SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', 'monospace'],
             },
             animation: {
               'float': 'float 6s ease-in-out infinite',
               'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-              'slide-in-left': 'slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
               'fade-in': 'fadeIn 0.3s ease-out',
               'scale-in': 'scaleIn 0.2s ease-out',
               'spin-slow': 'spin 8s linear infinite',
               'pulse-slow': 'pulse 4s ease-in-out infinite',
+              'scroll-infinite': 'scrollInfinite 20s linear infinite',
             },
             keyframes: {
               float: {
@@ -42,10 +41,6 @@
                 '0%': { transform: 'translateY(10px)', opacity: '0' },
                 '100%': { transform: 'translateY(0)', opacity: '1' },
               },
-              slideInLeft: {
-                '0%': { transform: 'translateX(-100%)', opacity: '0' },
-                '100%': { transform: 'translateX(0)', opacity: '1' },
-              },
               fadeIn: {
                 '0%': { opacity: '0' },
                 '100%': { opacity: '1' },
@@ -53,6 +48,10 @@
               scaleIn: {
                 '0%': { transform: 'scale(0.95)', opacity: '0' },
                 '100%': { transform: 'scale(1)', opacity: '1' },
+              },
+              scrollInfinite: {
+                '0%': { transform: 'translateX(0)' },
+                '100%': { transform: 'translateX(-33.333%)' },
               },
             },
           },
@@ -79,25 +78,22 @@
         color: #ffffff;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
         overscroll-behavior: none;
         position: fixed;
         touch-action: pan-x pan-y;
       }
 
-      /* iOS Safe Area Support */
       .pb-safe {
         padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
       }
 
-      /* Prevent bounce scrolling on iOS */
       html {
         position: fixed;
         height: 100%;
         overflow: hidden;
       }
 
-      /* Custom Scrollbar */
       ::-webkit-scrollbar {
         width: 6px;
         height: 6px;
@@ -116,7 +112,6 @@
         background: rgba(255, 255, 255, 0.3);
       }
 
-      /* Mobile Optimizations */
       @media (max-width: 768px) {
         * {
           -webkit-overflow-scrolling: touch;
@@ -127,19 +122,16 @@
         }
       }
 
-      /* Prevent text overflow */
       * {
         word-wrap: break-word;
         overflow-wrap: break-word;
       }
 
-      /* Active states for touch */
       button:active {
         transform: scale(0.96);
         transition: transform 0.1s;
       }
 
-      /* iOS 26 Glassmorphism */
       .ios-glass {
         background: rgba(255, 255, 255, 0.05);
         backdrop-filter: blur(40px) saturate(180%);
@@ -154,14 +146,12 @@
         border: 1px solid rgba(255, 255, 255, 0.08);
       }
 
-      /* Gradient Text */
       .bg-clip-text {
         -webkit-background-clip: text;
         background-clip: text;
         -webkit-text-fill-color: transparent;
       }
 
-      /* Loading Spinner */
       @keyframes spin {
         to { transform: rotate(360deg); }
       }
@@ -173,13 +163,11 @@
         animation: spin 0.8s linear infinite;
       }
 
-      /* Performance Optimizations */
       .chat-message {
         will-change: transform, opacity;
         contain: content;
       }
 
-      /* Reduce animations on low-end devices */
       @media (prefers-reduced-motion: reduce) {
         * {
           animation-duration: 0.01ms !important;
