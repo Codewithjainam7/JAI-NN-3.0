@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>JAI-NN 3.0</title>
+    <title>JAI-NN 3.0 - Advanced AI Chatbot</title>
+    <meta name="description" content="JAI-NN 3.0 - Next generation AI chatbot with advanced reasoning capabilities" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,9 +19,9 @@
               mono: ['JetBrains Mono', 'SF Mono', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
             },
             colors: {
-              oled: '#050505', // Slightly lifted from pure black for better font contrast
+              oled: '#050505',
               brand: {
-                500: '#6366f1', // Indigo
+                500: '#6366f1',
                 400: '#818cf8',
                 glow: 'rgba(99, 102, 241, 0.5)'
               },
@@ -82,13 +83,13 @@
 
       body {
         background-color: #000000;
-        color: #f1f5f9; /* Higher contrast text */
+        color: #f1f5f9;
         overflow-x: hidden;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
       }
       
-      /* Aurora Blobs - Subtler */
+      /* Aurora Blobs */
       .aurora-container {
         position: fixed;
         inset: 0;
@@ -106,7 +107,7 @@
         animation: drift 20s infinite alternate;
       }
 
-      /* Smoked Glass - Cleaner for readability */
+      /* Smoked Glass */
       .smoked-glass {
         background: rgba(15, 15, 20, 0.7);
         backdrop-filter: blur(24px) saturate(140%);
@@ -122,15 +123,16 @@
          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
       }
 
-      /* Text Mask Pattern - The Animation */
-      .text-pattern-cyber {
+      /* Evolution Text Cyber Animation - FIXED */
+      .text-cyber-evolution {
         background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2670&auto=format&fit=crop');
         background-size: 200% auto;
-        -webkit-background-clip: text;
         background-clip: text;
-        color: transparent;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         animation: textPan 10s linear infinite;
         display: inline-block;
+        filter: brightness(1.2) contrast(1.1);
       }
       
       /* Scrollbar */
@@ -138,6 +140,25 @@
       ::-webkit-scrollbar-track { background: #000; }
       ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
       ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+      /* iOS Scrollbar */
+      .ios-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #333 transparent;
+      }
+
+      .ios-scrollbar::-webkit-scrollbar {
+        width: 4px;
+      }
+
+      .ios-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .ios-scrollbar::-webkit-scrollbar-thumb {
+        background: #333;
+        border-radius: 2px;
+      }
     </style>
 <script type="importmap">
 {
