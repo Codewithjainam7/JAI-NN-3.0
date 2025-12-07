@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { Message, ModelId, Tier, UserSettings, ChatSession, User, Page } from './types';
 import { ChatMessage } from './components/ChatMessage';
 import { InputArea } from './components/InputArea';
@@ -14,7 +14,7 @@ import { MODELS } from './constants';
 import { streamChatResponse } from './services/geminiService';
 import { signInWithGoogle, supabase, signOut } from './services/supabaseService';
 
-// iOS 26 Style Boot Sequence with Your Logo
+// iOS 26 Style Boot Sequence
 const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
   const [opacity, setOpacity] = useState(0);
   
@@ -25,19 +25,19 @@ const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
 
   return (
     <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center transition-opacity duration-500" style={{ opacity }}>
-        <div className="relative mb-6">
-             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full blur-3xl opacity-60 animate-pulse"></div>
-             <div className="relative animate-float">
-                <JAINNLogo size={120} animated />
-             </div>
+      <div className="relative mb-6">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full blur-3xl opacity-60 animate-pulse"></div>
+        <div className="relative animate-float">
+          <JAINNLogo size={120} animated />
         </div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse mb-2">
-          JAI-NN 3.0
-        </h1>
-        <div className="flex items-center gap-2 text-white/40 text-sm font-mono">
-          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
-          <span>Initializing Neural Network...</span>
-        </div>
+      </div>
+      <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse mb-2">
+        JAI-NN 3.0
+      </h1>
+      <div className="flex items-center gap-2 text-white/40 text-sm font-mono">
+        <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+        <span>Initializing Neural Network...</span>
+      </div>
     </div>
   );
 };
@@ -140,7 +140,7 @@ const App: React.FC = () => {
     }
   };
 
-  const saveUserSettings = async () => {
+  const saveUserSettings = useCallback(async () => {
     if (!supabase || !user) return;
     try {
       await supabase.from('user_settings').upsert({
@@ -153,9 +153,9 @@ const App: React.FC = () => {
     } catch (err) {
       console.error('Error saving settings:', err);
     }
-  };
+  }, [supabase, user, settings.dailyImageCount, settings.dailyTokenUsage, settings.tier]);
 
-  const saveSession = async (session: ChatSession) => {
+  const saveSession = useCallback(async (session: ChatSession) => {
     if (!supabase || !user || user.id === 'guest') return;
     try {
       await supabase.from('chat_sessions').upsert({
@@ -168,10 +168,12 @@ const App: React.FC = () => {
     } catch (err) {
       console.error('Error saving session:', err);
     }
-  };
+  }, [supabase, user]);
 
   useEffect(() => { 
-      if(messagesEndRef.current) messagesEndRef.current.scrollIntoView({ behavior: 'smooth' }); 
+    if(messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' }); 
+    }
   }, [messages, isGenerating]);
 
   useEffect(() => {
@@ -185,26 +187,26 @@ const App: React.FC = () => {
       setSessions(prev => prev.map(s => s.id === currentSessionId ? updatedSession : s));
       if (user && user.id !== 'guest') saveSession(updatedSession);
     }
-  }, [messages, currentSessionId, user]);
+  }, [messages, currentSessionId, user, saveSession]);
 
   useEffect(() => {
     if (user && user.id !== 'guest') saveUserSettings();
-  }, [settings.dailyImageCount, settings.dailyTokenUsage, user]);
+  }, [settings.dailyImageCount, settings.dailyTokenUsage, user, saveUserSettings]);
 
   const handleAuth = async () => {
-      if (supabase) {
-        await signInWithGoogle();
-        setLoginOpen(false);
-      } else { 
-          handleGuestMode();
-      }
+    if (supabase) {
+      await signInWithGoogle();
+      setLoginOpen(false);
+    } else { 
+      handleGuestMode();
+    }
   };
 
   const handleGuestMode = () => {
-      setUser({ id: 'guest', name: 'Guest', email: 'guest@ai.com', avatar: '' }); 
-      setLoginOpen(false); 
-      setCurrentPage('chat');
-      createNewChat();
+    setUser({ id: 'guest', name: 'Guest', email: 'guest@ai.com', avatar: '' }); 
+    setLoginOpen(false); 
+    setCurrentPage('chat');
+    createNewChat();
   };
   
   const createNewChat = () => {
@@ -218,29 +220,31 @@ const App: React.FC = () => {
   };
 
   const handleSend = async (text: string) => {
-    // FIXED: Check image limit properly
-    if (text.startsWith('/imagine')) {
-        if (settings.tier === Tier.Free && settings.dailyImageCount >= settings.dailyImageLimit) {
-            setMessages(p => [...p, { 
-              id: Date.now().toString(), 
-              role: 'model', 
-              text: '⚠️ Daily image limit reached (5/day). Upgrade to Pro for unlimited access.', 
-              timestamp: Date.now() 
-            }]);
-            setPricingOpen(true);
-            return;
-        }
+    // FIXED: Proper image limit check
+    const isImageRequest = text.startsWith('/imagine');
+    
+    if (isImageRequest) {
+      if (settings.tier === Tier.Free && settings.dailyImageCount >= settings.dailyImageLimit) {
+        setMessages(p => [...p, { 
+          id: Date.now().toString(), 
+          role: 'model', 
+          text: '⚠️ Daily image limit reached (5/day). Upgrade to Pro for unlimited access.', 
+          timestamp: Date.now() 
+        }]);
+        setPricingOpen(true);
+        return;
+      }
     } else {
-        if (settings.tier === Tier.Free && settings.dailyTokenUsage >= settings.dailyTokenLimit) {
-             setMessages(p => [...p, { 
-               id: Date.now().toString(), 
-               role: 'model', 
-               text: '⚠️ Daily token limit reached (2,000/day). Upgrade to Pro for 100k/month.', 
-               timestamp: Date.now() 
-             }]);
-             setPricingOpen(true);
-             return;
-        }
+      if (settings.tier === Tier.Free && settings.dailyTokenUsage >= settings.dailyTokenLimit) {
+        setMessages(p => [...p, { 
+          id: Date.now().toString(), 
+          role: 'model', 
+          text: '⚠️ Daily token limit reached (2,000/day). Upgrade to Pro for 100k/month.', 
+          timestamp: Date.now() 
+        }]);
+        setPricingOpen(true);
+        return;
+      }
     }
 
     const userMsg: Message = { id: Date.now().toString(), role: 'user', text, timestamp: Date.now() };
@@ -250,49 +254,56 @@ const App: React.FC = () => {
     const estimatedTokens = Math.ceil(text.length * 0.25);
     setSettings(prev => ({ ...prev, dailyTokenUsage: prev.dailyTokenUsage + estimatedTokens }));
 
-    if (text.startsWith('/imagine')) {
-        setTimeout(() => {
-            const prompt = text.replace('/imagine', '').trim();
-            const seed = Math.floor(Math.random() * 1000000);
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&model=flux&nologo=true&seed=${seed}`;
-            setMessages(p => [...p, { id: Date.now().toString(), role: 'model', text: `![Image](${url})`, timestamp: Date.now() }]);
-            setIsGenerating(false);
-            setSettings(prev => ({ ...prev, dailyImageCount: prev.dailyImageCount + 1 }));
-        }, 1000);
-        return;
+    if (isImageRequest) {
+      setTimeout(() => {
+        const prompt = text.replace('/imagine', '').trim();
+        const seed = Math.floor(Math.random() * 1000000);
+        const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&model=flux&nologo=true&seed=${seed}`;
+        setMessages(p => [...p, { 
+          id: Date.now().toString(), 
+          role: 'model', 
+          text: `![Image](${url})`, 
+          timestamp: Date.now() 
+        }]);
+        setIsGenerating(false);
+        setSettings(prev => ({ ...prev, dailyImageCount: prev.dailyImageCount + 1 }));
+      }, 1000);
+      return;
     }
 
     const aiId = (Date.now() + 1).toString();
     setMessages(p => [...p, { id: aiId, role: 'model', text: '', timestamp: Date.now(), isThinking: true }]);
 
     try {
-        await streamChatResponse([...messages, userMsg], settings.currentModel, (chunk) => {
-            setMessages(p => p.map(m => m.id === aiId ? { ...m, text: chunk, isThinking: false } : m));
-        });
-        const responseTokens = Math.ceil(50 * 0.25);
-        setSettings(prev => ({ ...prev, dailyTokenUsage: prev.dailyTokenUsage + responseTokens })); 
+      await streamChatResponse([...messages, userMsg], settings.currentModel, (chunk) => {
+        setMessages(p => p.map(m => m.id === aiId ? { ...m, text: chunk, isThinking: false } : m));
+      });
+      const responseTokens = Math.ceil(50 * 0.25);
+      setSettings(prev => ({ ...prev, dailyTokenUsage: prev.dailyTokenUsage + responseTokens })); 
     } catch {
-        setMessages(p => p.map(m => m.id === aiId ? { ...m, text: 'Connection error. Please try again.', isThinking: false } : m));
-    } finally { setIsGenerating(false); }
+      setMessages(p => p.map(m => m.id === aiId ? { ...m, text: 'Connection error. Please try again.', isThinking: false } : m));
+    } finally { 
+      setIsGenerating(false); 
+    }
   };
 
   if (showBoot) return <BootSequence onComplete={() => setShowBoot(false)} />;
 
   if (currentPage === 'landing') return (
     <>
-        <LandingPage 
-            onEnter={() => { 
-                if(!user) setLoginOpen(true); 
-                else { setCurrentPage('chat'); createNewChat(); }
-            }} 
-            onNavigate={setCurrentPage} 
-        />
-        <LoginModal 
-            isOpen={isLoginOpen} 
-            onClose={() => setLoginOpen(false)}
-            onLogin={handleAuth}
-            onGuestMode={handleGuestMode}
-        />
+      <LandingPage 
+        onEnter={() => { 
+          if(!user) setLoginOpen(true); 
+          else { setCurrentPage('chat'); createNewChat(); }
+        }} 
+        onNavigate={setCurrentPage} 
+      />
+      <LoginModal 
+        isOpen={isLoginOpen} 
+        onClose={() => setLoginOpen(false)}
+        onLogin={handleAuth}
+        onGuestMode={handleGuestMode}
+      />
     </>
   );
 
@@ -338,79 +349,79 @@ const App: React.FC = () => {
       />
 
       <div className="flex-1 bg-black relative h-full flex flex-col min-w-0 overflow-hidden">
-          <div className="w-full h-full flex flex-col relative z-10">
-            
-            {/* iOS 26 Style Header */}
-            <header className="flex-none bg-black/60 backdrop-blur-2xl border-b border-white/10">
-              <div className="flex items-center justify-between px-4 h-16 max-w-4xl mx-auto">
-                <button 
-                  onClick={() => setSidebarOpen(!isSidebarOpen)} 
-                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors active:scale-95"
-                >
-                    <Icon name="panel-left" size={22} />
-                </button>
-                
-                <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
-                    <JAINNLogo size={28} />
-                    <span className="text-sm font-semibold hidden sm:inline">JAI-NN 3.0</span>
-                </div>
-                
-                <div className="flex gap-2">
-                    <button 
-                      onClick={() => setModelSelectorOpen(true)} 
-                      className="bg-white/5 backdrop-blur-xl rounded-2xl px-3 py-2 flex items-center gap-2 hover:bg-white/10 transition-all border border-white/10 active:scale-95"
-                    >
-                        <span className="text-lg">{MODELS.find(m=>m.id===settings.currentModel)?.icon}</span>
-                        <span className="text-xs font-medium hidden sm:inline">{MODELS.find(m=>m.id===settings.currentModel)?.name.split(' ')[1]}</span>
-                    </button>
-                    <button 
-                      onClick={() => setSettingsOpen(true)} 
-                      className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-white/5 hover:bg-white/10 transition-all border border-white/10 active:scale-95"
-                    >
-                        {user?.avatar ? (
-                          <img src={user.avatar} className="w-full h-full object-cover" alt={user.name} />
-                        ) : (
-                          <span className="font-semibold text-sm">{user?.name[0] || 'G'}</span>
-                        )}
-                    </button>
-                </div>
+        <div className="w-full h-full flex flex-col relative z-10">
+          
+          {/* iOS 26 Style Header */}
+          <header className="flex-none bg-black/60 backdrop-blur-2xl border-b border-white/10">
+            <div className="flex items-center justify-between px-4 h-16 max-w-4xl mx-auto">
+              <button 
+                onClick={() => setSidebarOpen(!isSidebarOpen)} 
+                className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors active:scale-95"
+              >
+                <Icon name="panel-left" size={22} />
+              </button>
+              
+              <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+                <JAINNLogo size={28} />
+                <span className="text-sm font-semibold hidden sm:inline">JAI-NN 3.0</span>
               </div>
-            </header>
-
-            {/* Messages Area - OPTIMIZED FOR MOBILE */}
-            <div className="flex-1 min-h-0 w-full overflow-y-auto px-4 py-4 max-w-4xl mx-auto">
-                {messages.length === 0 ? (
-                    <div className="h-full flex flex-col items-center justify-center">
-                        <div className="relative mb-6">
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full blur-2xl opacity-40"></div>
-                          <div className="relative">
-                            <JAINNLogo size={80} />
-                          </div>
-                        </div>
-                        <h2 className="text-2xl font-semibold mb-2 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                          Ready to assist
-                        </h2>
-                        <p className="text-white/40 text-sm">Start a conversation with JAI-NN</p>
-                    </div>
-                ) : (
-                    messages.map(msg => <ChatMessage key={msg.id} message={msg} onRegenerate={() => {}} accentColor={settings.accentColor} />)
-                )}
-                <div ref={messagesEndRef} />
+              
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setModelSelectorOpen(true)} 
+                  className="bg-white/5 backdrop-blur-xl rounded-2xl px-3 py-2 flex items-center gap-2 hover:bg-white/10 transition-all border border-white/10 active:scale-95"
+                >
+                  <span className="text-lg">{MODELS.find(m=>m.id===settings.currentModel)?.icon}</span>
+                  <span className="text-xs font-medium hidden sm:inline">{MODELS.find(m=>m.id===settings.currentModel)?.name.split(' ')[1]}</span>
+                </button>
+                <button 
+                  onClick={() => setSettingsOpen(true)} 
+                  className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-white/5 hover:bg-white/10 transition-all border border-white/10 active:scale-95"
+                >
+                  {user?.avatar ? (
+                    <img src={user.avatar} className="w-full h-full object-cover" alt={user.name} />
+                  ) : (
+                    <span className="font-semibold text-sm">{user?.name[0] || 'G'}</span>
+                  )}
+                </button>
+              </div>
             </div>
+          </header>
 
-            {/* Input Area */}
-            <div className="flex-none w-full p-3 pb-safe">
-                <InputArea 
-                  onSend={handleSend} 
-                  isLoading={isGenerating} 
-                  onStop={() => setIsGenerating(false)} 
-                  dailyImageCount={settings.dailyImageCount} 
-                  userTier={settings.tier} 
-                  onUpgradeTrigger={() => setPricingOpen(true)} 
-                />
-            </div>
-
+          {/* Messages Area */}
+          <div className="flex-1 min-h-0 w-full overflow-y-auto px-4 py-4 max-w-4xl mx-auto">
+            {messages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center">
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full blur-2xl opacity-40"></div>
+                  <div className="relative">
+                    <JAINNLogo size={80} />
+                  </div>
+                </div>
+                <h2 className="text-2xl font-semibold mb-2 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                  Ready to assist
+                </h2>
+                <p className="text-white/40 text-sm">Start a conversation with JAI-NN</p>
+              </div>
+            ) : (
+              messages.map(msg => <ChatMessage key={msg.id} message={msg} onRegenerate={() => {}} accentColor={settings.accentColor} />)
+            )}
+            <div ref={messagesEndRef} />
           </div>
+
+          {/* Input Area */}
+          <div className="flex-none w-full p-3 pb-safe">
+            <InputArea 
+              onSend={handleSend} 
+              isLoading={isGenerating} 
+              onStop={() => setIsGenerating(false)} 
+              dailyImageCount={settings.dailyImageCount} 
+              userTier={settings.tier} 
+              onUpgradeTrigger={() => setPricingOpen(true)} 
+            />
+          </div>
+
+        </div>
       </div>
 
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setSettingsOpen(false)} settings={settings} onUpdateSettings={s => setSettings(p => ({...p, ...s}))} user={user} />
