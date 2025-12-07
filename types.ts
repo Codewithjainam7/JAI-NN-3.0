@@ -52,6 +52,8 @@ export interface UserSettings {
   accentColor: string;
   dailyImageCount: number;
   dailyImageLimit: number;
+  dailyTokenUsage: number;
+  dailyTokenLimit: number;
   // New Advanced Settings
   systemInstruction?: string;
   customStarters?: string[];

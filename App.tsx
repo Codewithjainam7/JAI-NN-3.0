@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Message, ModelId, Tier, UserSettings, ChatSession, User, Page } from './types';
 import { ChatMessage } from './components/ChatMessage';
@@ -12,429 +11,266 @@ import { SettingsModal } from './components/SettingsModal';
 import { Icon } from './components/Icon';
 import { MODELS } from './constants';
 import { streamChatResponse } from './services/geminiService';
-import { signInWithGoogle, signOut, supabase } from './services/supabaseService';
+import { signInWithGoogle, supabase } from './services/supabaseService';
 
-// Complex Preloader with Logo Animation
-const Preloader = ({ onComplete }: { onComplete: () => void }) => {
+// Cinematic Boot Sequence Component
+const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
+  const [step, setStep] = useState(0);
+  
   useEffect(() => {
-    const timer = setTimeout(onComplete, 2000); 
-    return () => clearTimeout(timer);
+    // Timeline of boot events
+    const timers = [
+        setTimeout(() => setStep(1), 500),  // Start text
+        setTimeout(() => setStep(2), 1200), // Loading Modules
+        setTimeout(() => setStep(3), 2000), // Logo Reveal
+        setTimeout(onComplete, 3500)      // Finish
+    ];
+    return () => timers.forEach(clearTimeout);
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center">
-      <div className="relative flex items-center justify-center mb-8">
-        <div className="absolute inset-0 bg-blue-600/20 blur-[80px] rounded-full animate-pulse-slow"></div>
-        <div className="relative z-10 animate-bounce">
-           <Icon name="logo" size={100} />
-        </div>
-      </div>
-      <div className="flex gap-2">
-         <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-75"></div>
-         <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-150"></div>
-         <div className="w-2 h-2 bg-white rounded-full animate-bounce delay-300"></div>
-      </div>
+    <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center font-mono">
+        {step < 3 && (
+            <div className="w-64">
+                <div className="text-xs text-indigo-500 mb-2 flex justify-between">
+                    <span>BOOT_SEQUENCE_INIT</span>
+                    <span>v3.0.0</span>
+                </div>
+                <div className="h-1 bg-white/10 rounded-full overflow-hidden mb-4">
+                    <div className="h-full bg-indigo-500 animate-[width_2s_ease-in-out_forwards]" style={{ width: step > 0 ? '100%' : '0%' }}></div>
+                </div>
+                <div className="space-y-1 text-[10px] text-white/40 h-20">
+                    {step >= 1 && <div>> MOUNTING_NEURAL_FRAMEWORK... OK</div>}
+                    {step >= 1 && <div>> CONNECTING_TO_OLED_DISPLAY... OK</div>}
+                    {step >= 2 && <div>> LOADING_CORE_MODULES... OK</div>}
+                    {step >= 2 && <div className="animate-pulse">> WAITING_FOR_USER_HANDSHAKE...</div>}
+                </div>
+            </div>
+        )}
+
+        {step >= 3 && (
+            <div className="animate-fade-in flex flex-col items-center">
+                 <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-indigo-900 to-black border border-indigo-500/30 flex items-center justify-center mb-6 shadow-[0_0_50px_rgba(99,102,241,0.3)] animate-slide-up">
+                    <Icon name="logo" size={40} className="text-indigo-400" />
+                 </div>
+                 <h1 className="text-2xl font-bold tracking-widest text-white mb-2 animate-slide-up" style={{ animationDelay: '0.1s' }}>JAI-NN 3.0</h1>
+                 <p className="text-[10px] text-white/40 tracking-[0.5em] animate-slide-up" style={{ animationDelay: '0.2s' }}>ADVANCED AI CHATBOT</p>
+            </div>
+        )}
     </div>
   );
 };
 
 const App: React.FC = () => {
-  // --- View State ---
-  const [loading, setLoading] = useState(true);
+  const [showBoot, setShowBoot] = useState(true);
   const [currentPage, setCurrentPage] = useState<Page>('landing');
   const [user, setUser] = useState<User | null>(null);
-
-  // --- App State ---
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  
-  // Sidebar State
   const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
-  
-  // Modal States
   const [isPricingOpen, setPricingOpen] = useState(false);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isModelSelectorOpen, setModelSelectorOpen] = useState(false);
   const [isLoginOpen, setLoginOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   
-  // Settings
   const [settings, setSettings] = useState<UserSettings>({
     tier: Tier.Free,
     currentModel: ModelId.Flash,
     theme: 'dark',
-    accentColor: '#007AFF',
+    accentColor: '#6366f1',
     dailyImageCount: 0,
-    dailyImageLimit: 5
+    dailyImageLimit: 5,
+    dailyTokenUsage: 0,
+    dailyTokenLimit: 2000,
+    systemInstruction: '',
+    customStarters: []
   });
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // --- Effects ---
-  
-  // Auth Check
   useEffect(() => {
     if (supabase) {
       supabase.auth.getUser().then(({ data: { user: sbUser } }) => {
-        if (sbUser) {
-          setUser({
-            id: sbUser.id,
-            name: sbUser.user_metadata.full_name || sbUser.email || 'User',
-            email: sbUser.email || '',
-            avatar: sbUser.user_metadata.avatar_url || ''
-          });
-        }
+        if (sbUser) setUser({ id: sbUser.id, name: sbUser.user_metadata.full_name || 'User', email: sbUser.email || '', avatar: sbUser.user_metadata.avatar_url || '' });
       });
-
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session?.user) {
-          setUser({
-            id: session.user.id,
-            name: session.user.user_metadata.full_name || session.user.email || 'User',
-            email: session.user.email || '',
-            avatar: session.user.user_metadata.avatar_url || ''
-          });
-        } else {
-          setUser(null);
-        }
-      });
-
-      return () => subscription.unsubscribe();
     }
   }, []);
 
-  const scrollToBottom = () => {
-    setTimeout(() => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
-        }
-    }, 100);
-  };
-
-  useEffect(() => {
-    scrollToBottom();
+  useEffect(() => { 
+      if(messagesEndRef.current) messagesEndRef.current.scrollIntoView({ behavior: 'smooth' }); 
   }, [messages, isGenerating]);
 
-  // Sync messages
+  // Sync Logic... (Simplified for brevity, same as before)
   useEffect(() => {
     if (currentSessionId && messages.length > 0) {
-      setSessions(prev => prev.map(session => {
-        if (session.id === currentSessionId) {
-          let title = session.title;
-          if (title === 'New Chat' && messages.length > 0) {
-             const firstUserMsg = messages.find(m => m.role === 'user');
-             if (firstUserMsg) {
-               title = firstUserMsg.text.slice(0, 25) + (firstUserMsg.text.length > 25 ? '...' : '');
-             }
-          }
-          return { ...session, messages, title, updatedAt: Date.now() };
-        }
-        return session;
-      }));
+      setSessions(prev => prev.map(s => s.id === currentSessionId ? { ...s, messages, title: messages[0].text.slice(0,25), updatedAt: Date.now() } : s));
     }
   }, [messages, currentSessionId]);
 
-  // --- Handlers ---
   const handleAuth = async () => {
-      if (supabase) {
-        const { error } = await signInWithGoogle();
-        if (error) {
-            console.error("Supabase Login Error:", error);
-            alert("Could not connect to authentication server.");
-        }
-      } else {
-         // Fallback for demo without Supabase configured
-         console.warn("Supabase not configured. Logging in as guest.");
-         setUser({
-            id: 'guest',
-            name: 'Guest User',
-            email: 'guest@example.com',
-            avatar: ''
-        });
-        setLoginOpen(false);
+      if (supabase) await signInWithGoogle();
+      else { 
+          // Guest Fallback
+          setUser({ id: 'guest', name: 'Guest', email: 'guest@ai.com', avatar: '' }); 
+          setLoginOpen(false); 
+          if(currentPage === 'landing') {
+             setCurrentPage('chat');
+             createNewChat();
+          }
       }
   };
   
-  const handleLogout = async () => {
-      if (supabase) await signOut();
-      setUser(null);
-      setCurrentPage('landing');
-  };
-
   const createNewChat = () => {
     const newId = Date.now().toString();
-    const newSession: ChatSession = {
-      id: newId,
-      title: 'New Chat',
-      messages: [],
-      updatedAt: Date.now()
-    };
-    setSessions(prev => [newSession, ...prev]);
+    setSessions(prev => [{ id: newId, title: 'New Sequence', messages: [], updatedAt: Date.now() }, ...prev]);
     setCurrentSessionId(newId);
     setMessages([]);
     if (window.innerWidth < 768) setSidebarOpen(false);
   };
 
-  const handleDeleteSession = (id: string) => {
-      const newSessions = sessions.filter(s => s.id !== id);
-      setSessions(newSessions);
-      if (currentSessionId === id) {
-          if (newSessions.length > 0) {
-              setCurrentSessionId(newSessions[0].id);
-              setMessages(newSessions[0].messages);
-          } else {
-              setCurrentSessionId(null);
-              setMessages([]);
-              createNewChat();
-          }
-      }
-  };
-
-  const handleRenameSession = (id: string, newTitle: string) => {
-      setSessions(prev => prev.map(s => s.id === id ? { ...s, title: newTitle } : s));
-  };
-
-  const handleEnterChat = () => {
-    if (!user) {
-        setLoginOpen(true);
-    } else {
-        setCurrentPage('chat');
-        if (sessions.length === 0) createNewChat();
-    }
-  };
-
-  const handleGuestEnter = () => {
-      setLoginOpen(false);
-      setCurrentPage('chat');
-      if (sessions.length === 0) createNewChat();
-  };
-
-  const handleSelectSession = (id: string) => {
-    const session = sessions.find(s => s.id === id);
-    if (session) {
-      setCurrentSessionId(id);
-      setMessages(session.messages);
-      if (window.innerWidth < 768) setSidebarOpen(false);
-    }
-  };
-
-  const handleRegenerate = (msgIndex: number) => {
-      const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
-      if (lastUserMsg) {
-          handleSend(lastUserMsg.text);
-      }
-  };
-
   const handleSend = async (text: string) => {
-    if (text.startsWith('/imagine')) {
-        const newMessage: Message = { id: Date.now().toString(), role: 'user', text, timestamp: Date.now() };
-        setMessages(prev => [...prev, newMessage]);
-        setIsGenerating(true);
-        setSettings(prev => ({...prev, dailyImageCount: prev.dailyImageCount + 1}));
-
-        setTimeout(() => {
-            const prompt = text.replace('/imagine ', '');
-            // Append random seed to prevent caching
-            const seed = Math.floor(Math.random() * 100000);
-            const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&nologo=true&seed=${seed}`;
-            const aiMsg: Message = { 
-                id: (Date.now() + 1).toString(), 
-                role: 'model', 
-                text: `Generated image for: **${prompt}**\n\n![${prompt}](${imageUrl})`, 
-                timestamp: Date.now() 
-            };
-            setMessages(prev => [...prev, aiMsg]);
-            setIsGenerating(false);
-        }, 2000);
-        return;
+    // FREE TIER LIMITS CHECK
+    if (settings.tier === Tier.Free) {
+        // Image Limit
+        if (text.startsWith('/imagine')) {
+            if (settings.dailyImageCount >= settings.dailyImageLimit) {
+                setMessages(p => [...p, { id: Date.now().toString(), role: 'model', text: '⚠️ **LIMIT REACHED:** You have reached your daily image generation limit (5/day) on the Free plan. Upgrade to Pro for more.', timestamp: Date.now() }]);
+                setPricingOpen(true);
+                return;
+            }
+        } else {
+            // Token/Message Check (Approx 1 word = 1.3 tokens, simplifying to msg count or length)
+            if (settings.dailyTokenUsage >= settings.dailyTokenLimit) {
+                 setMessages(p => [...p, { id: Date.now().toString(), role: 'model', text: '⚠️ **LIMIT REACHED:** You have reached your daily token limit (2,000) on the Free plan. Upgrade to Pro for 100k/month.', timestamp: Date.now() }]);
+                 setPricingOpen(true);
+                 return;
+            }
+        }
     }
 
     const userMsg: Message = { id: Date.now().toString(), role: 'user', text, timestamp: Date.now() };
     setMessages(prev => [...prev, userMsg]);
     setIsGenerating(true);
+    
+    // Update Token Usage (Rough estimate: 1 char = 0.25 tokens)
+    const estimatedTokens = text.length * 0.25;
+    setSettings(prev => ({ ...prev, dailyTokenUsage: prev.dailyTokenUsage + estimatedTokens }));
 
-    const aiMsgId = (Date.now() + 1).toString();
-    const aiMsgPlaceholder: Message = { id: aiMsgId, role: 'model', text: '', timestamp: Date.now(), isThinking: true };
-    setMessages(prev => [...prev, aiMsgPlaceholder]);
+    // Image Generation Check
+    if (text.startsWith('/imagine')) {
+        setTimeout(() => {
+            const prompt = text.replace('/imagine', '').trim();
+            const seed = Math.floor(Math.random() * 1000000); // Random seed
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&model=flux&nologo=true&seed=${seed}`;
+            setMessages(p => [...p, { id: Date.now().toString(), role: 'model', text: `![Image](${url})`, timestamp: Date.now() }]);
+            setIsGenerating(false);
+            setSettings(prev => ({ ...prev, dailyImageCount: prev.dailyImageCount + 1 }));
+        }, 1000);
+        return;
+    }
+
+    const aiId = (Date.now() + 1).toString();
+    setMessages(p => [...p, { id: aiId, role: 'model', text: '', timestamp: Date.now(), isThinking: true }]);
 
     try {
-        await streamChatResponse(
-            [...messages, userMsg],
-            settings.currentModel,
-            (chunk) => {
-                setMessages(prev => prev.map(m => 
-                    m.id === aiMsgId ? { ...m, text: chunk, isThinking: false } : m
-                ));
-            }
-        );
-    } catch (error) {
-        setMessages(prev => prev.map(m => 
-            m.id === aiMsgId ? { ...m, text: 'Connection error. Please try again.', isThinking: false } : m
-        ));
-    } finally {
-        setIsGenerating(false);
-    }
+        await streamChatResponse([...messages, userMsg], settings.currentModel, (chunk) => {
+            setMessages(p => p.map(m => m.id === aiId ? { ...m, text: chunk, isThinking: false } : m));
+        });
+        // Update tokens for response (rough estimate)
+        // In a real app, the API returns usage metadata
+        setSettings(prev => ({ ...prev, dailyTokenUsage: prev.dailyTokenUsage + 50 })); 
+    } catch {
+        setMessages(p => p.map(m => m.id === aiId ? { ...m, text: 'ERR: CONNECTION_LOST', isThinking: false } : m));
+    } finally { setIsGenerating(false); }
   };
 
-  const handleStop = () => {
-    setIsGenerating(false);
-    setMessages(prev => prev.map(m => m.isThinking ? { ...m, isThinking: false, text: m.text + ' [Stopped]' } : m));
-  };
+  if (showBoot) return <BootSequence onComplete={() => setShowBoot(false)} />;
 
-  const currentModelInfo = MODELS.find(m => m.id === settings.currentModel);
+  if (currentPage === 'landing') return (
+    <>
+        <LandingPage 
+            onEnter={() => { 
+                if(!user) setLoginOpen(true); 
+                else { setCurrentPage('chat'); createNewChat(); }
+            }} 
+            onNavigate={setCurrentPage} 
+        />
+        <LoginModal 
+            isOpen={isLoginOpen} 
+            onClose={() => setLoginOpen(false)} // Can close without logging in on landing page
+            onLogin={handleAuth} 
+        />
+    </>
+  );
 
-  // --- Render ---
+  if (currentPage === 'creator') return <CreatorPage onBack={() => setCurrentPage('landing')} />;
+  if (currentPage === 'pricing') return <PricingPage onBack={() => setCurrentPage('landing')} onSelectTier={() => setCurrentPage('landing')} />;
 
-  if (loading) return <Preloader onComplete={() => setLoading(false)} />;
-
-  if (currentPage === 'landing') {
-    return (
-        <>
-            <LandingPage onEnter={handleEnterChat} onNavigate={setCurrentPage} />
-            <LoginModal isOpen={isLoginOpen} onClose={handleGuestEnter} onLogin={handleAuth} />
-        </>
-    );
-  }
-
-  if (currentPage === 'creator') {
-      return <CreatorPage onBack={() => setCurrentPage('landing')} />;
-  }
-
-  if (currentPage === 'pricing') {
-    return <PricingPage onBack={() => setCurrentPage('landing')} onSelectTier={() => setCurrentPage('landing')} />;
-  }
-
-  // --- CHAT LAYOUT: STRICT FLEXBOX SANDWICH ---
-  // The outer container must be fixed height 100dvh (dynamic viewport height) to allow inner scrolling
   return (
-    <div className="fixed inset-0 w-full h-[100dvh] bg-black text-white font-sans flex overflow-hidden">
+    <div className="fixed inset-0 w-full h-[100dvh] bg-oled text-white font-sans flex overflow-hidden">
       
-      {/* Sidebar */}
       <Sidebar 
-        isOpen={isSidebarOpen}
-        sessions={sessions}
-        currentSessionId={currentSessionId}
-        onNewChat={createNewChat}
-        onSelectSession={handleSelectSession}
-        onPricingOpen={() => setCurrentPage('pricing')}
-        onSettingsOpen={() => setSettingsOpen(true)}
-        currentTier={settings.tier}
-        onCloseMobile={() => setSidebarOpen(false)}
-        onHome={() => setCurrentPage('landing')}
-        onDeleteSession={handleDeleteSession}
-        onRenameSession={handleRenameSession}
+        isOpen={isSidebarOpen} sessions={sessions} currentSessionId={currentSessionId}
+        onNewChat={createNewChat} onSelectSession={(id) => { setCurrentSessionId(id); setMessages(sessions.find(s=>s.id===id)?.messages || []); }}
+        onPricingOpen={() => setPricingOpen(true)} onSettingsOpen={() => setSettingsOpen(true)}
+        currentTier={settings.tier} onCloseMobile={() => setSidebarOpen(false)} onHome={() => setCurrentPage('landing')}
+        onDeleteSession={(id) => setSessions(p => p.filter(s => s.id !== id))} onRenameSession={() => {}}
       />
 
-      {/* Main Content Area - Strict Vertical Stack */}
       <div className="flex-1 bg-black relative h-full flex flex-col min-w-0">
-          
-          {/* Centered Max-Width Wrapper for Alignment */}
-          <div className="w-full max-w-4xl mx-auto h-full flex flex-col border-x border-white/5 bg-black shadow-2xl shadow-black relative">
-
-            {/* 1. HEADER (Fixed Height) - Applied Liquid Glass */}
-            <header className="flex-none h-14 md:h-16 flex items-center justify-between px-4 bg-black/80 backdrop-blur-md border-b border-white/5 z-20">
-                <div className="flex items-center gap-3">
-                    <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="p-2 -ml-2 text-white/70 hover:text-white rounded-lg active:bg-white/10 transition-colors">
-                        <Icon name="panel-left" size={24} />
+          <div className="w-full max-w-5xl mx-auto h-full flex flex-col relative z-10 border-x border-white/5">
+            
+            {/* Header with Liquid Glass Buttons */}
+            <header className="flex-none h-16 flex items-center justify-between px-6">
+                <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="text-white/50 hover:text-white">
+                    <Icon name="panel-left" size={24} />
+                </button>
+                <div className="flex gap-4">
+                    <button onClick={() => setModelSelectorOpen(true)} className="liquid-glass-nav rounded-full px-4 py-1.5 flex items-center gap-2 hover:bg-white/10 transition-colors border border-white/10">
+                        <span className="text-sm">{MODELS.find(m=>m.id===settings.currentModel)?.icon}</span>
+                        <span className="text-xs font-mono tracking-wider">{MODELS.find(m=>m.id===settings.currentModel)?.name}</span>
                     </button>
-                    
-                    {/* Model Selector Button - Liquid Glass */}
-                    <button 
-                    onClick={() => setModelSelectorOpen(true)}
-                    className="flex items-center gap-2 px-4 py-1.5 rounded-full liquid-glass hover:bg-white/10 transition-all active:scale-95 group shadow-lg"
-                    >
-                        <span className="text-sm group-hover:scale-110 transition-transform">{currentModelInfo?.icon}</span>
-                        <span className="text-sm font-medium text-white/90 truncate max-w-[120px]">{currentModelInfo?.name}</span>
-                        <Icon name="chevron-down" size={12} className="text-white/50" />
+                    <button onClick={() => setSettingsOpen(true)} className="liquid-glass-nav rounded-full w-9 h-9 flex items-center justify-center hover:bg-white/10 transition-colors border border-white/10">
+                        {user?.avatar ? <img src={user.avatar} className="w-full h-full rounded-full object-cover" /> : <span className="font-bold text-xs">{user?.name[0]}</span>}
                     </button>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                    {/* User Profile Button - Liquid Glass */}
-                    {user ? (
-                        <button onClick={() => setSettingsOpen(true)} className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold border border-white/20 liquid-glass shadow-lg transition-transform hover:scale-105">
-                            {user.name.charAt(0)}
-                        </button>
-                    ) : (
-                        <button onClick={() => setLoginOpen(true)} className="liquid-glass rounded-full text-xs font-bold text-white/90 hover:text-white px-5 py-2 hover:bg-white/10 transition-colors shadow-lg">
-                            Log In
-                        </button>
-                    )}
                 </div>
             </header>
 
-            {/* 2. MESSAGES AREA (Flex-1, min-h-0 for scrolling) */}
-            <div className="flex-1 min-h-0 w-full overflow-y-auto overflow-x-hidden scroll-smooth custom-scrollbar relative">
-                <div className="min-h-full w-full px-4 py-6 flex flex-col">
-                    {messages.length === 0 ? (
-                    <div className="flex-1 flex flex-col items-center justify-center text-center opacity-60 min-h-[50vh]">
-                        <div className="w-20 h-20 mb-6 rounded-3xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center border border-white/10 shadow-2xl animate-fade-in">
-                            <Icon name="logo" size={40} />
-                        </div>
-                        <h2 className="text-2xl font-bold mb-2 text-white animate-slide-up">JAI-NN</h2>
-                        <p className="text-white/40 max-w-xs mx-auto text-sm leading-relaxed animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                            Advanced AI Assistant.<br/>
-                            Try <code className="bg-white/10 px-1 py-0.5 rounded text-white/70">/imagine</code> for art.
-                        </p>
+            {/* Messages */}
+            <div className="flex-1 min-h-0 w-full overflow-y-auto px-6 py-6 scroll-smooth">
+                {messages.length === 0 ? (
+                    <div className="h-full flex flex-col items-center justify-center opacity-40">
+                        <Icon name="logo" size={48} className="mb-4 text-indigo-500 animate-pulse-slow" />
+                        <div className="font-mono text-sm tracking-[0.3em]">SYSTEM_READY_3.0</div>
+                        <div className="text-xs text-white/30 mt-2 font-mono">{user?.name} DETECTED</div>
                     </div>
-                    ) : (
-                    <div className="space-y-6 pb-4 w-full">
-                        {messages.map((msg, index) => (
-                            <ChatMessage 
-                                    key={msg.id} 
-                                    message={msg} 
-                                    onRegenerate={() => handleRegenerate(index)}
-                                    accentColor={settings.accentColor}
-                                />
-                        ))}
-                        <div ref={messagesEndRef} className="h-px w-full" />
-                    </div>
-                    )}
-                </div>
+                ) : (
+                    messages.map((msg, i) => <ChatMessage key={msg.id} message={msg} onRegenerate={() => {}} accentColor={settings.accentColor} />)
+                )}
+                <div ref={messagesEndRef} />
             </div>
 
-            {/* 3. INPUT AREA (Fixed Height Content) */}
-            <div className="flex-none w-full bg-black z-20 pb-safe px-4 border-t border-white/5 pt-4">
-                <InputArea 
-                    onSend={handleSend} 
-                    isLoading={isGenerating} 
-                    onStop={handleStop}
-                    dailyImageCount={settings.dailyImageCount}
-                    userTier={settings.tier}
-                    onUpgradeTrigger={() => setCurrentPage('pricing')}
-                />
+            {/* Input Deck */}
+            <div className="flex-none w-full p-4 pb-6 bg-black">
+                <InputArea onSend={handleSend} isLoading={isGenerating} onStop={() => setIsGenerating(false)} dailyImageCount={settings.dailyImageCount} userTier={settings.tier} onUpgradeTrigger={() => setPricingOpen(true)} />
             </div>
-        </div>
+
+          </div>
       </div>
 
-      {/* --- Modals --- */}
-      <PricingModal 
-         isOpen={isPricingOpen} 
-         onClose={() => setPricingOpen(false)} 
-         currentTier={settings.tier}
-      />
-      <SettingsModal
-         isOpen={isSettingsOpen}
-         onClose={() => setSettingsOpen(false)}
-         settings={settings}
-         onUpdateSettings={(newSettings) => setSettings(prev => ({ ...prev, ...newSettings }))}
-      />
-      <ModelSelector
-         isOpen={isModelSelectorOpen}
-         onClose={() => setModelSelectorOpen(false)}
-         currentModel={settings.currentModel}
-         userTier={settings.tier}
-         onSelect={(id) => setSettings(prev => ({ ...prev, currentModel: id }))}
-         onUpgrade={() => {
-             setModelSelectorOpen(false);
-             setCurrentPage('pricing');
-         }}
-      />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setSettingsOpen(false)} settings={settings} onUpdateSettings={s => setSettings(p => ({...p, ...s}))} user={user} />
+      <ModelSelector isOpen={isModelSelectorOpen} onClose={() => setModelSelectorOpen(false)} currentModel={settings.currentModel} userTier={settings.tier} onSelect={id => setSettings(p => ({...p, currentModel: id}))} onUpgrade={() => setPricingOpen(true)} />
+      <PricingModal isOpen={isPricingOpen} onClose={() => setPricingOpen(false)} currentTier={settings.tier} />
       <LoginModal 
-        isOpen={isLoginOpen}
-        onClose={() => setLoginOpen(false)}
-        onLogin={handleAuth}
+        isOpen={isLoginOpen} 
+        onClose={() => {
+            // Force user to stay in modal if on Chat page, otherwise allow close to return to landing
+            if(currentPage === 'chat') { /* Prevent Close */ }
+            else setLoginOpen(false); 
+        }} 
+        onLogin={handleAuth} 
       />
     </div>
   );

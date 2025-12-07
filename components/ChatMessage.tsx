@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -12,7 +11,29 @@ interface ChatMessageProps {
   accentColor?: string;
 }
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate, accentColor = '#007AFF' }) => {
+const ImageRenderer = ({ src, alt }: { src?: string; alt?: string }) => {
+    const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+
+    return (
+        <div className="my-4 rounded-xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 relative min-h-[300px] flex items-center justify-center w-full max-w-[500px]">
+            {status === 'loading' && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-white/20 z-0">
+                     <div className="w-full h-px bg-indigo-500/50 absolute top-0 animate-scan"></div>
+                     <span className="text-[10px] font-mono uppercase tracking-widest text-white/40 bg-black px-2 z-10 border border-white/10">RENDERING_ASSETS</span>
+                </div>
+            )}
+            <img 
+                src={src} alt={alt} 
+                className={`relative z-10 w-full h-auto object-cover transition-all duration-700 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
+                onLoad={() => setStatus('loaded')}
+                onError={() => setStatus('error')}
+                loading="eager" 
+            />
+        </div>
+    );
+};
+
+export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate, accentColor = '#6366f1' }) => {
   const isUser = message.role === 'user';
   const [isCopied, setIsCopied] = useState(false);
 
@@ -22,50 +43,48 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate,
     setTimeout(() => setIsCopied(false), 2000);
   };
 
-  const handleDownload = () => {
-      const blob = new Blob([message.text], { type: 'text/markdown' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `response-${message.id}.md`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-  };
-
   return (
-    <div className={`group flex w-full mb-6 ${isUser ? 'justify-end' : 'justify-start'}`}>
-      <div className={`flex flex-col w-full max-w-[85%] ${isUser ? 'items-end' : 'items-start'}`}>
+    <div className={`group flex w-full ${isUser ? 'justify-end' : 'justify-start'} mb-6`}>
+      <div className={`flex flex-col w-full max-w-[85%] md:max-w-[75%] ${isUser ? 'items-end' : 'items-start'}`}>
+          
+          <div className={`text-[9px] font-mono text-white/30 mb-2 px-2 flex items-center gap-2 uppercase tracking-widest`}>
+              {isUser ? 'INPUT_STREAM' : 'SYSTEM_OUTPUT'}
+              <span className={`w-1.5 h-1.5 rounded-full ${isUser ? 'bg-white/20' : 'bg-indigo-500 animate-pulse'}`}></span>
+              {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+          </div>
+
           <div 
             className={`
-              relative px-5 py-4 overflow-hidden
+              relative px-6 py-5 transition-all backdrop-blur-md
               ${isUser 
-                ? 'text-white rounded-[24px] rounded-br-md shadow-lg custom-scrollbar border border-white/5' 
-                : 'glass-panel text-gray-100 rounded-[24px] rounded-bl-md border border-white/5'
+                ? 'rounded-[20px] rounded-tr-sm border border-white/10 bg-white/5' 
+                : 'smoked-glass rounded-[20px] rounded-tl-sm shadow-[0_4px_30px_rgba(0,0,0,0.5)]'
               }
-              animate-fade-in
             `}
             style={{
-               backgroundColor: isUser ? accentColor : undefined,
-               boxShadow: isUser ? `0 8px 32px -8px ${accentColor}60` : undefined,
-               maxHeight: isUser ? '300px' : undefined, // STRICT LIMIT on user messages
-               overflowY: isUser ? 'auto' : undefined
+               borderColor: isUser ? `${accentColor}40` : undefined,
+               boxShadow: isUser ? `0 0 20px ${accentColor}10` : undefined,
+               maxHeight: isUser ? '400px' : undefined, // Constraint for user messages
+               overflowY: isUser ? 'auto' : undefined,
             }}
           >
-            {/* Model Icon for AI messages */}
+            {/* Tech accents for AI */}
             {!isUser && (
-               <div className="absolute -left-10 top-0 w-8 h-8 rounded-full bg-black/40 flex items-center justify-center border border-white/10 backdrop-blur-sm hidden md:flex">
-                  <Icon name="logo" size={18} />
-               </div>
+                <>
+                    <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-white/20 rounded-tl-xl"></div>
+                    <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-white/20 rounded-br-xl"></div>
+                </>
             )}
 
-            <div className="prose prose-invert prose-sm max-w-none leading-relaxed break-words">
+            <div className="prose prose-invert prose-sm max-w-none leading-relaxed font-light">
               {message.isThinking ? (
-                 <div className="flex space-x-1.5 py-2">
-                    <div className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '0s' }}></div>
-                    <div className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '0.15s' }}></div>
-                    <div className="w-2 h-2 bg-white/40 rounded-full animate-bounce" style={{ animationDelay: '0.3s' }}></div>
+                 <div className="flex items-center gap-3 py-2">
+                    <div className="flex space-x-1">
+                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div>
+                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce delay-100"></div>
+                        <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce delay-200"></div>
+                    </div>
+                    <span className="text-xs font-mono text-indigo-400/70 tracking-widest">PROCESSING</span>
                  </div>
               ) : (
                 <ReactMarkdown
@@ -74,46 +93,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate,
                     code({ node, inline, className, children, ...props }: any) {
                       const match = /language-(\w+)/.exec(className || '');
                       return !inline && match ? (
-                        <CodeBlock
-                          language={match[1]}
-                          value={String(children).replace(/\n$/, '')}
-                        />
+                        <CodeBlock language={match[1]} value={String(children).replace(/\n$/, '')} />
                       ) : (
-                        <code className="px-1.5 py-0.5 rounded bg-white/10 font-mono text-sm text-white/90 break-all" {...props}>
+                        <code className="px-1.5 py-0.5 rounded bg-white/10 font-mono text-xs text-indigo-300 border border-white/5" {...props}>
                           {children}
                         </code>
                       );
                     },
-                    table: ({ children }) => (
-                      <div className="overflow-x-auto my-4 rounded-lg border border-white/10 max-w-full bg-white/5">
-                        <table className="min-w-full divide-y divide-white/10">{children}</table>
-                      </div>
-                    ),
-                    thead: ({ children }) => <thead className="bg-white/5">{children}</thead>,
-                    th: ({ children }) => <th className="px-4 py-3 text-left text-xs font-semibold text-white/60 uppercase tracking-wider">{children}</th>,
-                    td: ({ children }) => <td className="px-4 py-3 whitespace-nowrap text-sm text-white/80 border-t border-white/5">{children}</td>,
-                    p: ({ children }) => <p className="mb-4 last:mb-0">{children}</p>,
-                    a: ({ children, href }) => <a href={href} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline cursor-pointer break-all">{children}</a>,
-                    img: ({ src, alt }) => (
-                      <div className="my-4 rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/30 relative min-h-[200px] flex items-center justify-center group/img">
-                        <div className="absolute inset-0 flex items-center justify-center text-white/20">
-                            <Icon name="image" size={32} />
-                        </div>
-                        <img 
-                            src={src} 
-                            alt={alt} 
-                            className="relative z-10 w-full h-auto object-cover max-h-[500px] transition-transform duration-500 group-hover/img:scale-105" 
-                            loading="lazy" 
-                            onError={(e) => {
-                                (e.target as HTMLImageElement).style.display = 'none';
-                                (e.target as HTMLImageElement).parentElement!.innerHTML = `<div class="p-8 text-center text-white/40 text-sm flex flex-col items-center gap-2"><svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" /></svg>Image generation failed or expired.</div>`;
-                            }}
-                        />
-                        <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover/img:opacity-100 transition-opacity z-20">
-                            <p className="text-xs text-white/80 truncate">{alt}</p>
-                        </div>
-                      </div>
-                    )
+                    img: ({ src, alt }) => <ImageRenderer src={src} alt={alt} />
                   }}
                 >
                   {message.text}
@@ -122,25 +109,16 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate,
             </div>
           </div>
           
-          {/* Action Bar (AI Only) */}
           {!isUser && !message.isThinking && (
-              <div className="flex items-center gap-2 mt-2 ml-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
-                  <button onClick={handleCopyAll} className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors" title="Copy">
-                      {isCopied ? <Icon name="check" size={14} /> : <Icon name="copy" size={14} />}
+              <div className="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-2">
+                  <button onClick={handleCopyAll} className="p-1.5 rounded hover:bg-white/10 text-white/30 hover:text-white transition-colors" title="Copy">
+                      <Icon name="copy" size={14} />
                   </button>
-                  <button onClick={onRegenerate} className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors" title="Regenerate">
+                  <button onClick={onRegenerate} className="p-1.5 rounded hover:bg-white/10 text-white/30 hover:text-white transition-colors" title="Regenerate">
                       <Icon name="refresh" size={14} />
                   </button>
-                   <button onClick={handleDownload} className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors" title="Download">
-                      <Icon name="download" size={14} />
-                  </button>
-                  <div className="w-px h-3 bg-white/10 mx-1"></div>
-                  <button className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors">
-                      <Icon name="thumbs-up" size={14} />
-                  </button>
-                  <button className="p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-colors">
-                      <Icon name="thumbs-down" size={14} />
-                  </button>
+                  <div className="h-3 w-px bg-white/10 mx-1"></div>
+                  <button className="text-[10px] font-mono text-white/30 hover:text-white transition-colors">REPORT_OUTLIER</button>
               </div>
           )}
       </div>

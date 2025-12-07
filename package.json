@@ -1,3 +1,4 @@
+
 {
   "name": "jai-nn-2.0",
   "version": "2.0.0",
@@ -9,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google/genai": "^0.0.12",
+    "@google/genai": "^0.1.0",
     "@supabase/supabase-js": "^2.39.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

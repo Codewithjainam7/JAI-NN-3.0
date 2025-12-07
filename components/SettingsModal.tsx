@@ -1,6 +1,5 @@
-
-import React, { useState } from 'react';
-import { UserSettings, Tier } from '../types';
+import React from 'react';
+import { UserSettings, Tier, User } from '../types';
 import { Icon } from './Icon';
 
 interface SettingsModalProps {
@@ -8,141 +7,103 @@ interface SettingsModalProps {
   onClose: () => void;
   settings: UserSettings;
   onUpdateSettings: (newSettings: Partial<UserSettings>) => void;
+  user: User | null;
 }
 
 const ACCENT_COLORS = [
-  { name: 'Default Blue', value: '#007AFF', tier: Tier.Free },
+  { name: 'OLED Blue', value: '#007AFF', tier: Tier.Free },
   { name: 'Neon Purple', value: '#AF52DE', tier: Tier.Pro },
   { name: 'Cyber Pink', value: '#FF2D55', tier: Tier.Pro },
   { name: 'Sunset Orange', value: '#FF9500', tier: Tier.Pro },
-  { name: 'Emerald Green', value: '#34C759', tier: Tier.Ultra },
+  { name: 'Matrix Green', value: '#34C759', tier: Tier.Ultra },
   { name: 'Electric Teal', value: '#30B0C7', tier: Tier.Ultra },
 ];
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings, onUpdateSettings }) => {
+export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings, onUpdateSettings, user }) => {
   if (!isOpen) return null;
 
   const canUseSystemInstructions = settings.tier !== Tier.Free;
-  const canUseUnlimitedStarters = settings.tier === Tier.Ultra;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose}></div>
-      <div className="relative w-full max-w-2xl glass-panel rounded-3xl p-6 md:p-8 animate-slide-up border border-white/10 max-h-[90vh] overflow-y-auto ios-scrollbar shadow-2xl shadow-blue-900/10">
+      <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={onClose}></div>
+      <div className="relative w-full max-w-2xl smoked-glass rounded-[2rem] p-8 animate-slide-up max-h-[90vh] overflow-y-auto custom-scrollbar border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)]">
         
-        <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
-            <h2 className="text-2xl font-bold text-white">Settings</h2>
-            <button onClick={onClose} className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-white/60 transition-colors">
+        <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+            <h2 className="text-xl font-bold text-white tracking-widest font-mono flex items-center gap-3">
+                <Icon name="settings" size={20} className="text-indigo-500" />
+                SYSTEM_CONFIG
+            </h2>
+            <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors">
                 <Icon name="x" size={20} />
             </button>
         </div>
 
-        {/* Profile Section */}
-        <div className="mb-8">
-            <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4">Account</h3>
-            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/5">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-lg font-bold text-white border-2 border-white/10 shadow-lg shadow-purple-500/20">
-                    JJ
+        {/* Identity */}
+        <div className="mb-10">
+            <div className="flex items-center gap-4 p-5 rounded-2xl bg-white/5 border border-white/5">
+                <div className="w-14 h-14 rounded-full bg-indigo-900/50 flex items-center justify-center border border-indigo-500/30 text-indigo-300 font-bold text-xl">
+                    {user ? user.name.charAt(0).toUpperCase() : 'G'}
                 </div>
                 <div>
-                    <div className="font-medium text-white text-lg">Jainam User</div>
-                    <div className="text-sm text-white/50">user@example.com</div>
-                    <div className="mt-2 text-[10px] font-bold px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 inline-block border border-blue-500/30 uppercase tracking-wide">
-                        {settings.tier} Plan
-                    </div>
+                    <div className="font-bold text-white font-mono">{user ? user.name : 'GUEST_USER'}</div>
+                    <div className="text-xs text-white/40 font-mono tracking-wider">{user ? user.email : 'ID: ANONYMOUS'}</div>
+                    <span className="inline-block mt-2 px-2 py-0.5 rounded bg-white/5 border border-white/5 text-[9px] font-mono text-white/60">
+                        {settings.tier} LICENSE ACTIVE
+                    </span>
                 </div>
             </div>
         </div>
 
-        {/* Chat Appearance (New) */}
-        <div className="mb-8">
-            <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <Icon name="sparkles" size={14} />
-                Chat Appearance
-            </h3>
-            
-            <div className="p-6 rounded-2xl bg-white/5 border border-white/10">
-                <label className="block text-sm font-medium text-white mb-4">Interface Accent Color</label>
-                <div className="flex flex-wrap gap-4">
-                    {ACCENT_COLORS.map(color => {
-                        const isLocked = (color.tier === Tier.Pro && settings.tier === Tier.Free) || 
-                                       (color.tier === Tier.Ultra && settings.tier !== Tier.Ultra);
-                        
-                        return (
-                            <button
-                                key={color.value}
-                                disabled={isLocked}
-                                onClick={() => onUpdateSettings({ accentColor: color.value })}
-                                className={`group relative w-12 h-12 rounded-full border-2 transition-all flex items-center justify-center ${
-                                    settings.accentColor === color.value 
-                                    ? 'border-white scale-110 shadow-lg shadow-white/20' 
-                                    : 'border-transparent hover:scale-105'
-                                } ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                                style={{ backgroundColor: color.value }}
-                                title={color.name}
-                            >
-                                {isLocked && <Icon name="lock" size={14} className="text-black/50" />}
-                                {settings.accentColor === color.value && !isLocked && <Icon name="check" size={16} className="text-white drop-shadow-md" />}
-                            </button>
-                        );
-                    })}
-                </div>
-                <p className="text-xs text-white/30 mt-4">
-                    Unlock additional themes with Pro and Ultra tiers.
-                </p>
+        {/* Chat Appearance */}
+        <div className="mb-10">
+            <h3 className="text-xs font-bold text-white/30 uppercase tracking-[0.2em] mb-4 font-mono">INTERFACE_THEME</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {ACCENT_COLORS.map(color => {
+                    const isLocked = (color.tier === Tier.Pro && settings.tier === Tier.Free) || 
+                                   (color.tier === Tier.Ultra && settings.tier !== Tier.Ultra);
+                    return (
+                        <button
+                            key={color.value}
+                            disabled={isLocked}
+                            onClick={() => onUpdateSettings({ accentColor: color.value })}
+                            className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${
+                                settings.accentColor === color.value 
+                                ? 'bg-white/10 border-white/30' 
+                                : 'bg-transparent border-white/5 hover:bg-white/5'
+                            } ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        >
+                            <div className="w-4 h-4 rounded-full shadow-[0_0_10px_currentColor]" style={{ backgroundColor: color.value, color: color.value }}></div>
+                            <span className="text-xs font-mono text-white/80">{color.name}</span>
+                            {isLocked && <Icon name="lock" size={10} className="ml-auto text-white/20" />}
+                        </button>
+                    );
+                })}
             </div>
         </div>
 
         {/* System Intelligence */}
         <div className="mb-8">
-            <h3 className="text-xs font-bold text-white/40 uppercase tracking-widest mb-4 flex items-center gap-2">
-                <Icon name="cpu" size={14} />
-                System Intelligence
-            </h3>
+            <h3 className="text-xs font-bold text-white/30 uppercase tracking-[0.2em] mb-4 font-mono">NEURAL_OVERRIDES</h3>
             
-            <div className={`p-6 rounded-2xl border transition-all mb-4 ${canUseSystemInstructions ? 'bg-white/5 border-white/10' : 'bg-white/5 border-white/5 opacity-80'}`}>
-                <div className="flex items-center justify-between mb-3">
-                     <label className="block text-sm font-medium text-white">System Persona</label>
-                     {!canUseSystemInstructions && (
-                         <div className="px-2 py-1 rounded bg-white/10 text-[10px] font-bold text-white/50 flex items-center gap-1 border border-white/5">
-                             <Icon name="lock" size={10} /> PRO
-                         </div>
-                     )}
+            <div className={`p-5 rounded-2xl border mb-4 transition-all ${canUseSystemInstructions ? 'bg-white/5 border-white/5' : 'bg-transparent border-white/5 opacity-60'}`}>
+                <div className="flex justify-between mb-2">
+                    <label className="text-xs font-mono text-white/70">SYSTEM_INSTRUCTION (PERSONA)</label>
+                    {!canUseSystemInstructions && <Icon name="lock" size={12} className="text-white/30" />}
                 </div>
-                <p className="text-xs text-white/40 mb-3">Define a custom persona or set of rules for JAI-NN to follow globally.</p>
                 <textarea 
                     disabled={!canUseSystemInstructions}
-                    placeholder={canUseSystemInstructions ? "e.g., You are a senior engineer who loves concise code..." : "Upgrade to Pro to unlock custom persona injection."}
-                    className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 min-h-[100px] resize-none focus:outline-none focus:border-blue-500/50 transition-colors"
                     value={settings.systemInstruction || ''}
                     onChange={(e) => onUpdateSettings({ systemInstruction: e.target.value })}
-                />
-            </div>
-
-             <div className={`p-6 rounded-2xl border transition-all ${canUseSystemInstructions ? 'bg-white/5 border-white/10' : 'bg-white/5 border-white/5 opacity-80'}`}>
-                <div className="flex items-center justify-between mb-3">
-                     <label className="block text-sm font-medium text-white">Conversation Starters</label>
-                     {!canUseUnlimitedStarters && (
-                         <div className="px-2 py-1 rounded bg-white/10 text-[10px] font-bold text-white/50 flex items-center gap-1 border border-white/5">
-                             <Icon name="lock" size={10} /> {settings.tier === Tier.Pro ? 'ULTRA' : 'PRO'}
-                         </div>
-                     )}
-                </div>
-                 <p className="text-xs text-white/40 mb-3">
-                    Customize the quick-start prompts on the empty chat screen.
-                </p>
-                <input 
-                    disabled={!canUseUnlimitedStarters}
-                    placeholder="Coming in next update..."
-                    className="w-full bg-black/30 border border-white/10 rounded-xl px-4 py-3 text-sm text-white/50 focus:outline-none"
+                    placeholder={canUseSystemInstructions ? "Define AI behavior protocols..." : "Unlock Pro to access Neural Configuration."}
+                    className="w-full bg-black/50 border border-white/10 rounded-lg p-3 text-sm font-mono text-white/80 placeholder-white/20 focus:border-indigo-500/50 outline-none h-24 resize-none"
                 />
             </div>
         </div>
 
-        <button onClick={onClose} className="w-full py-4 rounded-xl bg-white text-black font-bold hover:bg-white/90 transition-colors shadow-lg shadow-white/10">
-            Save Changes
+        <button onClick={onClose} className="w-full py-3 rounded-xl bg-white text-black font-bold font-mono tracking-widest hover:bg-indigo-50 transition-colors">
+            SAVE_CONFIG
         </button>
-
       </div>
     </div>
   );
