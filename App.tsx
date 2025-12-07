@@ -39,10 +39,10 @@ const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
                     <div className="h-full bg-indigo-500 animate-[width_2s_ease-in-out_forwards]" style={{ width: step > 0 ? '100%' : '0%' }}></div>
                 </div>
                 <div className="space-y-1 text-[10px] text-white/40 h-20">
-                    {step >= 1 && <div>> MOUNTING_NEURAL_FRAMEWORK... OK</div>}
-                    {step >= 1 && <div>> CONNECTING_TO_OLED_DISPLAY... OK</div>}
-                    {step >= 2 && <div>> LOADING_CORE_MODULES... OK</div>}
-                    {step >= 2 && <div className="animate-pulse">> INITIALIZING_CHATBOT_ENGINE...</div>}
+                    {step >= 1 && <div>{'>'} MOUNTING_NEURAL_FRAMEWORK... OK</div>}
+{step >= 1 && <div>{'>'} CONNECTING_TO_OLED_DISPLAY... OK</div>}
+{step >= 2 && <div>{'>'} LOADING_CORE_MODULES... OK</div>}
+{step >= 2 && <div className="animate-pulse">{'>'} INITIALIZING_CHATBOT_ENGINE...</div>}
                 </div>
             </div>
         )}
