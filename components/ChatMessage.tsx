@@ -15,15 +15,17 @@ const ImageRenderer = ({ src, alt }: { src?: string; alt?: string }) => {
     const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
 
     return (
-        <div className="my-4 rounded-3xl overflow-hidden ios-card relative min-h-[200px] sm:min-h-[280px] flex items-center justify-center w-full max-w-full animate-scale-in">
+        <div className="my-3 rounded-3xl overflow-hidden ios-card relative min-h-[220px] flex items-center justify-center w-full animate-scale-in" style={{ maxWidth: '100%' }}>
             {status === 'loading' && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                     <div className="w-8 h-8 border-3 border-white/20 border-t-blue-500 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                     <div className="w-8 h-8 loading-spinner"></div>
                 </div>
             )}
             <img 
-                src={src} alt={alt} 
-                className={`w-full h-auto object-contain rounded-3xl transition-all duration-500 ${status === 'loaded' ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+                src={src} 
+                alt={alt || 'Generated image'} 
+                className={`w-full h-auto object-contain rounded-3xl transition-all duration-500 ${status === 'loaded' ? 'opacity-100' : 'opacity-0'}`}
+                style={{ maxWidth: '100%', maxHeight: '500px' }}
                 onLoad={() => setStatus('loaded')}
                 onError={() => setStatus('error')}
                 loading="lazy" 
@@ -43,33 +45,44 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate,
   };
 
   return (
-    <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} mb-4 sm:mb-6 animate-slide-up`}>
-      <div className={`flex flex-col w-full max-w-[88%] sm:max-w-[75%] md:max-w-[65%] ${isUser ? 'items-end' : 'items-start'}`}>
+    <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} animate-slide-up`}>
+      <div className={`flex flex-col w-full ${isUser ? 'items-end max-w-[85%]' : 'items-start max-w-[90%]'} sm:max-w-[75%]`}>
           
+          {/* Avatar & Name */}
           <div className="flex items-center gap-2 mb-2 px-1">
-              <div className={`w-2 h-2 rounded-full ${isUser ? 'bg-blue-500' : 'bg-purple-500'} ${!isUser && message.isThinking ? 'animate-pulse' : ''}`}></div>
-              <span className="text-[10px] text-white/40 font-medium">
+              {!isUser && (
+                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0">
+                  <Icon name="logo" size={14} className="text-white" />
+                </div>
+              )}
+              <span className="ios-caption text-white/50 font-medium">
                 {isUser ? 'You' : 'JAI-NN'}
               </span>
-              <span className="text-[10px] text-white/20 hidden sm:inline">
-                {new Date(message.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-              </span>
+              {isUser && (
+                <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-semibold">Y</span>
+                </div>
+              )}
           </div>
 
+          {/* Message Bubble */}
           <div 
             className={`
-              relative px-4 sm:px-5 py-3 sm:py-4 transition-all w-full
+              relative px-4 py-3 transition-all w-full chat-message
               ${isUser 
-                ? 'rounded-[20px] rounded-br-md ios-glass-light shadow-lg' 
-                : 'rounded-[20px] rounded-bl-md ios-card shadow-2xl'
+                ? 'rounded-[22px] rounded-br-md ios-glass-light shadow-lg' 
+                : 'rounded-[22px] rounded-bl-md ios-card shadow-xl'
               }
             `}
             style={{
-               background: isUser ? `linear-gradient(135deg, ${accentColor}25 0%, ${accentColor}10 100%)` : undefined,
-               borderLeft: isUser ? `3px solid ${accentColor}` : undefined,
+               background: isUser ? `linear-gradient(135deg, ${accentColor}20 0%, ${accentColor}08 100%)` : undefined,
+               borderLeft: isUser ? `2px solid ${accentColor}` : undefined,
+               maxWidth: '100%',
+               wordWrap: 'break-word',
+               overflowWrap: 'break-word',
             }}
           >
-            <div className="prose prose-invert prose-sm max-w-none leading-relaxed break-words">
+            <div className="prose prose-invert prose-sm max-w-none" style={{ maxWidth: '100%' }}>
               {message.isThinking ? (
                  <div className="flex items-center gap-2 py-1">
                     <div className="flex gap-1">
@@ -77,7 +90,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate,
                         <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
                         <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
                     </div>
-                    <span className="text-xs text-white/50 font-medium">Thinking...</span>
+                    <span className="ios-caption text-white/40">Thinking...</span>
                  </div>
               ) : (
                 <ReactMarkdown
@@ -88,28 +101,48 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate,
                       return !inline && match ? (
                         <CodeBlock language={match[1]} value={String(children).replace(/\n$/, '')} />
                       ) : (
-                        <code className="px-2 py-1 rounded-lg bg-white/10 font-mono text-xs text-blue-300 break-all" {...props}>
+                        <code 
+                          className="px-2 py-0.5 rounded-lg bg-white/10 font-mono text-xs text-blue-300" 
+                          style={{ wordBreak: 'break-all', overflowWrap: 'break-word' }}
+                          {...props}
+                        >
                           {children}
                         </code>
                       );
                     },
                     img: ({ src, alt }) => <ImageRenderer src={src} alt={alt} />,
-                    p: ({ children }) => <p className="mb-3 last:mb-0 break-words text-[15px] leading-relaxed">{children}</p>,
+                    p: ({ children }) => (
+                      <p 
+                        className="mb-2 last:mb-0 ios-body text-white/90 leading-relaxed" 
+                        style={{ wordWrap: 'break-word', overflowWrap: 'break-word', maxWidth: '100%' }}
+                      >
+                        {children}
+                      </p>
+                    ),
                     a: ({ href, children }) => (
-                      <a href={href} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:text-blue-300 underline break-all">
+                      <a 
+                        href={href} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-blue-400 hover:text-blue-300 underline"
+                        style={{ wordBreak: 'break-all' }}
+                      >
                         {children}
                       </a>
                     ),
-                    h1: ({ children }) => <h1 className="text-xl font-bold mb-3 mt-4">{children}</h1>,
-                    h2: ({ children }) => <h2 className="text-lg font-bold mb-2 mt-3">{children}</h2>,
-                    h3: ({ children }) => <h3 className="text-base font-semibold mb-2 mt-2">{children}</h3>,
-                    ul: ({ children }) => <ul className="list-disc list-inside mb-3 space-y-1">{children}</ul>,
-                    ol: ({ children }) => <ol className="list-decimal list-inside mb-3 space-y-1">{children}</ol>,
+                    h1: ({ children }) => <h1 className="text-xl font-bold mb-2 mt-3">{children}</h1>,
+                    h2: ({ children }) => <h2 className="ios-headline mb-2 mt-2">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-base font-semibold mb-2">{children}</h3>,
+                    ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-1 ml-2">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1 ml-2">{children}</ol>,
+                    li: ({ children }) => <li className="ios-body text-white/85">{children}</li>,
                     blockquote: ({ children }) => (
-                      <blockquote className="border-l-3 border-white/30 pl-4 italic text-white/70 my-3">
+                      <blockquote className="border-l-2 border-white/30 pl-3 italic text-white/60 my-2">
                         {children}
                       </blockquote>
                     ),
+                    strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
+                    em: ({ children }) => <em className="italic text-white/90">{children}</em>,
                   }}
                 >
                   {message.text}
@@ -118,21 +151,22 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onRegenerate,
             </div>
           </div>
           
+          {/* Actions */}
           {!isUser && !message.isThinking && (
-              <div className="flex items-center gap-2 mt-2 px-1 opacity-0 hover:opacity-100 transition-opacity">
+              <div className="flex items-center gap-1.5 mt-2 px-1 opacity-0 hover:opacity-100 transition-opacity">
                   <button 
                     onClick={handleCopyAll} 
                     className="ios-button p-2 rounded-xl ios-glass-light hover:bg-white/15 transition-all" 
                     title="Copy"
                   >
-                      <Icon name={isCopied ? "check" : "copy"} size={14} />
+                      <Icon name={isCopied ? "check" : "copy"} size={13} className={isCopied ? 'text-green-400' : ''} />
                   </button>
                   <button 
                     onClick={onRegenerate} 
                     className="ios-button p-2 rounded-xl ios-glass-light hover:bg-white/15 transition-all" 
                     title="Regenerate"
                   >
-                      <Icon name="refresh" size={14} />
+                      <Icon name="refresh" size={13} />
                   </button>
               </div>
           )}
