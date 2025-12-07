@@ -8,27 +8,35 @@ import { CreatorPage } from './components/CreatorPage';
 import { PricingPage } from './components/PricingPage';
 import { PricingModal, ModelSelector, LoginModal } from './components/Modals';
 import { SettingsModal } from './components/SettingsModal';
+import { JAINNLogo } from './components/JAINNLogo';
 import { Icon } from './components/Icon';
 import { MODELS } from './constants';
 import { streamChatResponse } from './services/geminiService';
 import { signInWithGoogle, supabase, signOut } from './services/supabaseService';
 
-// iOS 26 Style Boot Sequence
+// iOS 26 Style Boot Sequence with Your Logo
 const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
   const [opacity, setOpacity] = useState(0);
   
   useEffect(() => {
     setTimeout(() => setOpacity(1), 100);
-    setTimeout(onComplete, 2000);
+    setTimeout(onComplete, 2500);
   }, [onComplete]);
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex items-center justify-center transition-opacity duration-500" style={{ opacity }}>
-        <div className="relative">
-             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl blur-3xl opacity-50 animate-glow-pulse"></div>
-             <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-2xl animate-float">
-                <Icon name="logo" size={40} className="text-white" />
+    <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center transition-opacity duration-500" style={{ opacity }}>
+        <div className="relative mb-6">
+             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full blur-3xl opacity-60 animate-pulse"></div>
+             <div className="relative animate-float">
+                <JAINNLogo size={120} animated />
              </div>
+        </div>
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse mb-2">
+          JAI-NN 3.0
+        </h1>
+        <div className="flex items-center gap-2 text-white/40 text-sm font-mono">
+          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+          <span>Initializing Neural Network...</span>
         </div>
     </div>
   );
@@ -41,7 +49,7 @@ const App: React.FC = () => {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isPricingOpen, setPricingOpen] = useState(false);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
   const [isModelSelectorOpen, setModelSelectorOpen] = useState(false);
@@ -205,34 +213,33 @@ const App: React.FC = () => {
     setSessions(prev => [newSession, ...prev]);
     setCurrentSessionId(newId);
     setMessages([]);
-    if (window.innerWidth < 768) setSidebarOpen(false);
+    setSidebarOpen(false);
     if (user && user.id !== 'guest') saveSession(newSession);
   };
 
   const handleSend = async (text: string) => {
-    if (settings.tier === Tier.Free) {
-        if (text.startsWith('/imagine')) {
-            if (settings.dailyImageCount >= settings.dailyImageLimit) {
-                setMessages(p => [...p, { 
-                  id: Date.now().toString(), 
-                  role: 'model', 
-                  text: '⚠️ Daily image limit reached (5/day). Upgrade to Pro for unlimited access.', 
-                  timestamp: Date.now() 
-                }]);
-                setPricingOpen(true);
-                return;
-            }
-        } else {
-            if (settings.dailyTokenUsage >= settings.dailyTokenLimit) {
-                 setMessages(p => [...p, { 
-                   id: Date.now().toString(), 
-                   role: 'model', 
-                   text: '⚠️ Daily token limit reached (2,000/day). Upgrade to Pro for 100k/month.', 
-                   timestamp: Date.now() 
-                 }]);
-                 setPricingOpen(true);
-                 return;
-            }
+    // FIXED: Check image limit properly
+    if (text.startsWith('/imagine')) {
+        if (settings.tier === Tier.Free && settings.dailyImageCount >= settings.dailyImageLimit) {
+            setMessages(p => [...p, { 
+              id: Date.now().toString(), 
+              role: 'model', 
+              text: '⚠️ Daily image limit reached (5/day). Upgrade to Pro for unlimited access.', 
+              timestamp: Date.now() 
+            }]);
+            setPricingOpen(true);
+            return;
+        }
+    } else {
+        if (settings.tier === Tier.Free && settings.dailyTokenUsage >= settings.dailyTokenLimit) {
+             setMessages(p => [...p, { 
+               id: Date.now().toString(), 
+               role: 'model', 
+               text: '⚠️ Daily token limit reached (2,000/day). Upgrade to Pro for 100k/month.', 
+               timestamp: Date.now() 
+             }]);
+             setPricingOpen(true);
+             return;
         }
     }
 
@@ -296,10 +303,20 @@ const App: React.FC = () => {
     <div className="fixed inset-0 w-full h-[100dvh] bg-black text-white flex overflow-hidden">
       
       <Sidebar 
-        isOpen={isSidebarOpen} sessions={sessions} currentSessionId={currentSessionId}
-        onNewChat={createNewChat} onSelectSession={(id) => { setCurrentSessionId(id); setMessages(sessions.find(s=>s.id===id)?.messages || []); }}
-        onPricingOpen={() => setPricingOpen(true)} onSettingsOpen={() => setSettingsOpen(true)}
-        currentTier={settings.tier} onCloseMobile={() => setSidebarOpen(false)} onHome={() => setCurrentPage('landing')}
+        isOpen={isSidebarOpen} 
+        sessions={sessions} 
+        currentSessionId={currentSessionId}
+        onNewChat={createNewChat} 
+        onSelectSession={(id) => { 
+          setCurrentSessionId(id); 
+          setMessages(sessions.find(s=>s.id===id)?.messages || []); 
+          setSidebarOpen(false);
+        }}
+        onPricingOpen={() => setPricingOpen(true)} 
+        onSettingsOpen={() => setSettingsOpen(true)}
+        currentTier={settings.tier} 
+        onCloseMobile={() => setSidebarOpen(false)} 
+        onHome={() => setCurrentPage('landing')}
         onDeleteSession={async (id) => {
           setSessions(p => p.filter(s => s.id !== id));
           if (supabase && user && user.id !== 'guest') {
@@ -320,43 +337,59 @@ const App: React.FC = () => {
         }}
       />
 
-      <div className="flex-1 bg-black relative h-full flex flex-col min-w-0 overflow-hidden chat-container">
-          <div className="w-full max-w-4xl mx-auto h-full flex flex-col relative z-10">
+      <div className="flex-1 bg-black relative h-full flex flex-col min-w-0 overflow-hidden">
+          <div className="w-full h-full flex flex-col relative z-10">
             
             {/* iOS 26 Style Header */}
-            <header className="flex-none ios-glass border-b border-white/10">
-              <div className="flex items-center justify-between px-4 sm:px-6 h-16">
-                <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="ios-button w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors">
+            <header className="flex-none bg-black/60 backdrop-blur-2xl border-b border-white/10">
+              <div className="flex items-center justify-between px-4 h-16 max-w-4xl mx-auto">
+                <button 
+                  onClick={() => setSidebarOpen(!isSidebarOpen)} 
+                  className="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition-colors active:scale-95"
+                >
                     <Icon name="panel-left" size={22} />
                 </button>
                 
+                <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
+                    <JAINNLogo size={28} />
+                    <span className="text-sm font-semibold hidden sm:inline">JAI-NN 3.0</span>
+                </div>
+                
                 <div className="flex gap-2">
-                    <button onClick={() => setModelSelectorOpen(true)} className="ios-button ios-glass-light rounded-2xl px-3 sm:px-4 py-2 flex items-center gap-2 hover:bg-white/15 transition-all">
+                    <button 
+                      onClick={() => setModelSelectorOpen(true)} 
+                      className="bg-white/5 backdrop-blur-xl rounded-2xl px-3 py-2 flex items-center gap-2 hover:bg-white/10 transition-all border border-white/10 active:scale-95"
+                    >
                         <span className="text-lg">{MODELS.find(m=>m.id===settings.currentModel)?.icon}</span>
-                        <span className="text-sm font-medium hidden sm:inline">{MODELS.find(m=>m.id===settings.currentModel)?.name.split(' ')[1]}</span>
+                        <span className="text-xs font-medium hidden sm:inline">{MODELS.find(m=>m.id===settings.currentModel)?.name.split(' ')[1]}</span>
                     </button>
-                    <button onClick={() => setSettingsOpen(true)} className="ios-button w-10 h-10 rounded-full overflow-hidden flex items-center justify-center ios-glass-light hover:bg-white/15 transition-all">
+                    <button 
+                      onClick={() => setSettingsOpen(true)} 
+                      className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-white/5 hover:bg-white/10 transition-all border border-white/10 active:scale-95"
+                    >
                         {user?.avatar ? (
                           <img src={user.avatar} className="w-full h-full object-cover" alt={user.name} />
                         ) : (
-                          <span className="font-semibold text-sm">{user?.name[0]}</span>
+                          <span className="font-semibold text-sm">{user?.name[0] || 'G'}</span>
                         )}
                     </button>
                 </div>
               </div>
             </header>
 
-            {/* Messages Area */}
-            <div className="flex-1 min-h-0 w-full overflow-y-auto px-4 sm:px-6 py-4 sm:py-6">
+            {/* Messages Area - OPTIMIZED FOR MOBILE */}
+            <div className="flex-1 min-h-0 w-full overflow-y-auto px-4 py-4 max-w-4xl mx-auto">
                 {messages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center">
-                        <div className="relative mb-6 animate-float">
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-3xl blur-2xl opacity-40"></div>
-                          <div className="relative w-16 h-16 rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-2xl">
-                            <Icon name="logo" size={32} className="text-white" />
+                        <div className="relative mb-6">
+                          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full blur-2xl opacity-40"></div>
+                          <div className="relative">
+                            <JAINNLogo size={80} />
                           </div>
                         </div>
-                        <h2 className="text-2xl font-semibold mb-2 gradient-text">Ready to assist</h2>
+                        <h2 className="text-2xl font-semibold mb-2 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                          Ready to assist
+                        </h2>
                         <p className="text-white/40 text-sm">Start a conversation with JAI-NN</p>
                     </div>
                 ) : (
@@ -366,8 +399,15 @@ const App: React.FC = () => {
             </div>
 
             {/* Input Area */}
-            <div className="flex-none w-full p-3 sm:p-4 pb-safe">
-                <InputArea onSend={handleSend} isLoading={isGenerating} onStop={() => setIsGenerating(false)} dailyImageCount={settings.dailyImageCount} userTier={settings.tier} onUpgradeTrigger={() => setPricingOpen(true)} />
+            <div className="flex-none w-full p-3 pb-safe">
+                <InputArea 
+                  onSend={handleSend} 
+                  isLoading={isGenerating} 
+                  onStop={() => setIsGenerating(false)} 
+                  dailyImageCount={settings.dailyImageCount} 
+                  userTier={settings.tier} 
+                  onUpgradeTrigger={() => setPricingOpen(true)} 
+                />
             </div>
 
           </div>
