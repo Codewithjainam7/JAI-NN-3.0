@@ -2,13 +2,19 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>JAI-NN 3.0 - Advanced AI Chatbot</title>
     <meta name="description" content="JAI-NN 3.0 - Next generation AI chatbot with advanced reasoning capabilities" />
+    <meta name="theme-color" content="#000000" />
+    
+    <!-- Favicon as Data URI with Your Logo -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%233B82F6'/%3E%3Cstop offset='50%25' style='stop-color:%238B5CF6'/%3E%3Cstop offset='100%25' style='stop-color:%23EC4899'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='100' cy='100' r='85' stroke='url(%23g)' stroke-width='8' fill='none' opacity='0.8'/%3E%3Ccircle cx='100' cy='50' r='12' fill='url(%23g)'/%3E%3Ccircle cx='140' cy='80' r='10' fill='url(%23g)'/%3E%3Ccircle cx='140' cy='120' r='10' fill='url(%23g)'/%3E%3Ccircle cx='100' cy='150' r='12' fill='url(%23g)'/%3E%3Ccircle cx='60' cy='120' r='10' fill='url(%23g)'/%3E%3Ccircle cx='60' cy='80' r='10' fill='url(%23g)'/%3E%3Ccircle cx='100' cy='100' r='20' fill='url(%23g)'/%3E%3Ccircle cx='100' cy='100' r='8' fill='url(%23g)'/%3E%3C/svg%3E" />
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
     <script>
       tailwind.config = {
         darkMode: 'class',
@@ -16,32 +22,16 @@
           extend: {
             fontFamily: {
               sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'Segoe UI', 'Roboto', 'sans-serif'],
-            },
-            colors: {
-              ios: {
-                bg: '#000000',
-                card: 'rgba(255, 255, 255, 0.08)',
-                border: 'rgba(255, 255, 255, 0.12)',
-                text: '#ffffff',
-                'text-secondary': 'rgba(255, 255, 255, 0.6)',
-                blue: '#007AFF',
-                teal: '#5AC8FA',
-                purple: '#AF52DE',
-                pink: '#FF2D55',
-                green: '#34C759',
-              }
-            },
-            backgroundImage: {
-              'ios-gradient': 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
-              'ios-mesh': 'radial-gradient(at 40% 20%, hsla(240, 100%, 70%, 0.3) 0px, transparent 50%), radial-gradient(at 80% 0%, hsla(189, 100%, 56%, 0.3) 0px, transparent 50%), radial-gradient(at 0% 50%, hsla(355, 100%, 93%, 0.3) 0px, transparent 50%)',
+              mono: ['SF Mono', 'Monaco', 'Cascadia Code', 'Roboto Mono', 'monospace'],
             },
             animation: {
               'float': 'float 6s ease-in-out infinite',
-              'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1)',
+              'slide-up': 'slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+              'slide-in-left': 'slideInLeft 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
               'fade-in': 'fadeIn 0.3s ease-out',
               'scale-in': 'scaleIn 0.2s ease-out',
-              'shimmer': 'shimmer 2s infinite',
-              'glow-pulse': 'glowPulse 3s ease-in-out infinite',
+              'spin-slow': 'spin 8s linear infinite',
+              'pulse-slow': 'pulse 4s ease-in-out infinite',
             },
             keyframes: {
               float: {
@@ -52,6 +42,10 @@
                 '0%': { transform: 'translateY(10px)', opacity: '0' },
                 '100%': { transform: 'translateY(0)', opacity: '1' },
               },
+              slideInLeft: {
+                '0%': { transform: 'translateX(-100%)', opacity: '0' },
+                '100%': { transform: 'translateX(0)', opacity: '1' },
+              },
               fadeIn: {
                 '0%': { opacity: '0' },
                 '100%': { opacity: '1' },
@@ -60,111 +54,53 @@
                 '0%': { transform: 'scale(0.95)', opacity: '0' },
                 '100%': { transform: 'scale(1)', opacity: '1' },
               },
-              shimmer: {
-                '0%': { backgroundPosition: '-200% 0' },
-                '100%': { backgroundPosition: '200% 0' },
-              },
-              glowPulse: {
-                '0%, 100%': { opacity: '0.5', transform: 'scale(1)' },
-                '50%': { opacity: '0.8', transform: 'scale(1.05)' },
-              },
             },
-            backdropBlur: {
-              'xl': '40px',
-              '2xl': '60px',
-            }
           },
         },
       }
     </script>
+    
     <style>
       * {
         box-sizing: border-box;
         -webkit-tap-highlight-color: transparent;
       }
 
-      body {
-        background: #000000;
-        color: #ffffff;
-        overflow-x: hidden;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
+      html, body, #root {
         margin: 0;
         padding: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', sans-serif;
-      }
-
-      /* iOS Glass Morphism */
-      .ios-glass {
-        background: rgba(28, 28, 30, 0.72);
-        backdrop-filter: saturate(180%) blur(20px);
-        -webkit-backdrop-filter: saturate(180%) blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .ios-glass-light {
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: saturate(180%) blur(30px);
-        -webkit-backdrop-filter: saturate(180%) blur(30px);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-      }
-
-      .ios-card {
-        background: rgba(30, 30, 30, 0.85);
-        backdrop-filter: blur(40px);
-        -webkit-backdrop-filter: blur(40px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-      }
-
-      /* iOS Gradient Mesh Background */
-      .ios-mesh-bg {
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        background: #000;
+        height: 100%;
+        width: 100%;
         overflow: hidden;
       }
 
-      .mesh-gradient {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(100px);
-        opacity: 0.4;
-        animation: float 8s ease-in-out infinite;
+      body {
+        background: #000000;
+        color: #ffffff;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', sans-serif;
+        overscroll-behavior: none;
+        position: fixed;
+        touch-action: pan-x pan-y;
       }
 
-      .mesh-1 {
-        width: 500px;
-        height: 500px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        top: -10%;
-        left: -10%;
-        animation-delay: 0s;
+      /* iOS Safe Area Support */
+      .pb-safe {
+        padding-bottom: env(safe-area-inset-bottom, 0.75rem);
       }
 
-      .mesh-2 {
-        width: 400px;
-        height: 400px;
-        background: linear-gradient(135deg, #5AC8FA 0%, #007AFF 100%);
-        bottom: -10%;
-        right: -10%;
-        animation-delay: -2s;
+      /* Prevent bounce scrolling on iOS */
+      html {
+        position: fixed;
+        height: 100%;
+        overflow: hidden;
       }
 
-      .mesh-3 {
-        width: 350px;
-        height: 350px;
-        background: linear-gradient(135deg, #FF2D55 0%, #AF52DE 100%);
-        top: 40%;
-        right: 20%;
-        animation-delay: -4s;
-      }
-
-      /* Smooth Scrollbar */
+      /* Custom Scrollbar */
       ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 6px;
+        height: 6px;
       }
 
       ::-webkit-scrollbar-track {
@@ -180,62 +116,15 @@
         background: rgba(255, 255, 255, 0.3);
       }
 
-      /* iOS Button Effects */
-      .ios-button {
-        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      }
-
-      .ios-button:active {
-        transform: scale(0.96);
-        opacity: 0.8;
-      }
-
-      /* iOS Haptic Feedback Simulation */
-      @keyframes haptic {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(0.98); }
-      }
-
-      .haptic-feedback:active {
-        animation: haptic 0.1s ease-in-out;
-      }
-
-      /* Gradient Text */
-      .gradient-text {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-        background-size: 200% auto;
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        animation: shimmer 3s linear infinite;
-      }
-
-      /* Ensure content doesn't overflow */
-      .chat-container {
-        max-width: 100%;
-        overflow-x: hidden;
-      }
-
-      .prose {
-        max-width: 100%;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-      }
-
-      .prose pre {
-        max-width: 100%;
-        overflow-x: auto;
-      }
-
-      .prose img {
-        max-width: 100%;
-        height: auto;
-      }
-
-      /* iOS Input Style */
-      input, textarea {
-        -webkit-appearance: none;
-        appearance: none;
+      /* Mobile Optimizations */
+      @media (max-width: 768px) {
+        * {
+          -webkit-overflow-scrolling: touch;
+        }
+        
+        input, textarea, button {
+          font-size: 16px !important; /* Prevents iOS zoom on focus */
+        }
       }
 
       /* Prevent text overflow */
@@ -243,31 +132,49 @@
         word-wrap: break-word;
         overflow-wrap: break-word;
       }
+
+      /* Active states for touch */
+      button:active {
+        transform: scale(0.96);
+        transition: transform 0.1s;
+      }
+
+      /* Backdrop Blur Support */
+      @supports (backdrop-filter: blur(20px)) or (-webkit-backdrop-filter: blur(20px)) {
+        .backdrop-blur-xl {
+          backdrop-filter: blur(40px);
+          -webkit-backdrop-filter: blur(40px);
+        }
+        
+        .backdrop-blur-2xl {
+          backdrop-filter: blur(60px);
+          -webkit-backdrop-filter: blur(60px);
+        }
+      }
+
+      /* Gradient Text */
+      .bg-clip-text {
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      /* Loading Spinner */
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+
+      /* Mesh Background */
+      .mesh-gradient {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(100px);
+        opacity: 0.3;
+        animation: float 8s ease-in-out infinite;
+      }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "vite": "https://aistudiocdn.com/vite@^7.2.6",
-    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.1",
-    "react/": "https://aistudiocdn.com/react@^19.2.1/",
-    "react": "https://aistudiocdn.com/react@^19.2.1",
-    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.31.0",
-    "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0",
-    "react-syntax-highlighter/": "https://aistudiocdn.com/react-syntax-highlighter@^16.1.0/",
-    "react-syntax-highlighter": "https://aistudiocdn.com/react-syntax-highlighter@^16.1.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
-    "remark-gfm": "https://aistudiocdn.com/remark-gfm@^4.0.1",
-    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.86.2"
-  }
-}
-</script>
-</head>
+  </head>
   <body>
-    <div class="ios-mesh-bg">
-       <div class="mesh-gradient mesh-1"></div>
-       <div class="mesh-gradient mesh-2"></div>
-       <div class="mesh-gradient mesh-3"></div>
-    </div>
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
