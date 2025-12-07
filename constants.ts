@@ -1,17 +1,16 @@
-
-import { ModelConfig, ModelId, Tier } from './types';
+import { ModelId, Tier } from './types';
 
 export const CREATOR_INFO = {
   name: "Jainam Jain",
   title: "AI Generalist",
-  description: "A visionary developer pursuing the path of an AI Generalist. Creator of JAI-NN, creating bridges between human creativity and artificial intelligence.",
+  description: "A visionary developer pursuing the path of an AI Generalist. Creator of JAI-NN 3.0, creating bridges between human creativity and artificial intelligence.",
   github: "https://github.com/Codewithjainam7",
   website: "https://jainamjain.netlify.app",
   social: "@Codewithjainam7",
-  avatar: "https://github.com/Codewithjainam7.png" // Auto-fetches your GitHub profile picture
+  avatar: "https://github.com/Codewithjainam7.png"
 };
 
-export const MODELS: ModelConfig[] = [
+export const MODELS = [
   {
     id: ModelId.Flash,
     name: 'Gemini Flash 2.5',
@@ -34,15 +33,16 @@ export const PRICING_PLANS = [
     price: '$0',
     tier: Tier.Free,
     features: [
-      '10,000 tokens/month',
+      '2,000 tokens/day (60k/month)',
       'Gemini Flash 2.5 Access',
-      'Basic Image Generation (5/day)',
-      'Chat History & New Chat',
+      'Image Generation (5/day)',
+      'Chat History',
       'Community Support'
     ],
     unavailable: [
       'Model Switching',
-      'Advanced Logic (Pro)'
+      'Advanced Logic (Pro)',
+      'Unlimited Context'
     ],
     cta: 'Current Plan'
   },
@@ -55,14 +55,14 @@ export const PRICING_PLANS = [
     features: [
       '100,000 tokens/month',
       'Gemini Pro 2.5 & Flash',
-      'Advanced Image Models',
+      'Unlimited Image Generation',
       'Custom System Prompts',
       'Priority Responses',
       'Smart Context Memory'
     ],
     unavailable: [
-      'Unlimited Context',
-      'Voice Mode 2.0'
+      'Voice Mode 2.0',
+      'Dedicated Support'
     ],
     cta: 'Upgrade to Pro'
   },
@@ -73,7 +73,7 @@ export const PRICING_PLANS = [
     tier: Tier.Ultra,
     features: [
       'Unlimited Tokens',
-      'Unlimited Image Gens',
+      'Unlimited Everything',
       'Real-time Voice Mode 2.0',
       'White-glove Onboarding',
       '24/7 Priority Support',
@@ -84,6 +84,6 @@ export const PRICING_PLANS = [
   }
 ];
 
-export const SYSTEM_INSTRUCTION = `You are JAI-NN, an advanced AI assistant created by Jainam Jain. 
+export const SYSTEM_INSTRUCTION = `You are JAI-NN 3.0, an advanced AI assistant created by Jainam Jain. 
 Your design philosophy is cleanliness and precision.
-You are helpful, witty, and precise.`;
+You are helpful, witty, and precise. You provide accurate, well-structured responses.`;
