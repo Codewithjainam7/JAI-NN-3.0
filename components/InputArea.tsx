@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Icon } from './Icon';
 import { Tier } from '../types';
-import { TiltCard } from './TiltCard';
 
 interface InputAreaProps {
   onSend: (text: string) => void;
@@ -33,30 +32,39 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading, onStop 
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(); }
+      if (e.key === 'Enter' && !e.shiftKey) { 
+        e.preventDefault(); 
+        handleSubmit(); 
+      }
   };
 
   return (
-    <div className="w-full flex flex-col items-center pb-2 max-w-3xl mx-auto">
+    <div className="w-full flex flex-col items-center max-w-3xl mx-auto">
           {imageMode && (
-            <div className="w-full flex items-center justify-between mb-2 px-4 py-1.5 bg-indigo-500/10 border border-indigo-500/30 rounded-t-lg animate-fade-in mx-2">
-                <span className="text-[10px] font-mono text-indigo-300 uppercase tracking-widest flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></span>
-                    VISUAL_SYNTHESIS_ACTIVE
-                </span>
+            <div className="w-full mb-2 animate-slide-up">
+              <div className="ios-glass-light rounded-2xl px-4 py-2 flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></div>
+                <span className="text-xs text-white/60 font-medium">Image Generation Mode</span>
+                <button 
+                  onClick={() => setImageMode(false)}
+                  className="ml-auto ios-button p-1 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <Icon name="x" size={14} />
+                </button>
+              </div>
             </div>
           )}
 
-          <TiltCard className="w-full rounded-[2rem]">
-              <div className={`relative flex items-end gap-2 p-2 rounded-[2rem] bg-[#050505] border border-white/10 transition-all duration-300 focus-within:border-indigo-500/50 focus-within:shadow-[0_0_30px_rgba(99,102,241,0.15)] ${isLoading ? 'border-indigo-500/30' : ''}`}>
+          <div className="w-full ios-card rounded-[28px] p-2 shadow-2xl animate-scale-in">
+              <div className="flex items-end gap-2">
                 
-                {isLoading && (
-                    <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-indigo-500 to-transparent animate-scan opacity-50"></div>
-                )}
-
                 <button 
                     onClick={() => setImageMode(!imageMode)}
-                    className={`p-3 rounded-full transition-colors shrink-0 ${imageMode ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/20' : 'hover:bg-white/5 text-white/40 hover:text-white'}`}
+                    className={`ios-button haptic-feedback shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center transition-all ${
+                      imageMode 
+                        ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/30' 
+                        : 'ios-glass-light hover:bg-white/15'
+                    }`}
                 >
                     <Icon name="image" size={20} />
                 </button>
@@ -66,29 +74,32 @@ export const InputArea: React.FC<InputAreaProps> = ({ onSend, isLoading, onStop 
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder={imageMode ? "Describe visual parameters..." : "Input command..."}
-                  className="flex-1 bg-transparent border-0 focus:ring-0 text-white placeholder-white/20 resize-none py-3 px-2 max-h-[120px] custom-scrollbar text-[15px] font-medium leading-relaxed outline-none"
+                  placeholder={imageMode ? "Describe what you want to create..." : "Message JAI-NN..."}
+                  className="flex-1 bg-transparent border-0 focus:ring-0 text-white placeholder-white/30 resize-none py-3 px-2 max-h-[120px] text-[15px] font-normal leading-relaxed outline-none"
                   rows={1}
+                  style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 />
 
                 <button
                       onClick={handleSubmit}
                       disabled={!input.trim() && !isLoading}
-                      className={`w-11 h-11 flex items-center justify-center rounded-full transition-all duration-300 shrink-0 ${
-                            isLoading ? 'bg-red-500/10 text-red-500 border border-red-500/20 animate-pulse' : 
-                            input.trim() ? 'bg-white text-black hover:bg-indigo-50 hover:text-indigo-900 shadow-[0_0_15px_rgba(255,255,255,0.2)]' : 
-                            'bg-white/5 text-white/20 cursor-not-allowed'
+                      className={`ios-button haptic-feedback shrink-0 w-11 h-11 rounded-2xl flex items-center justify-center transition-all ${
+                            isLoading 
+                              ? 'bg-gradient-to-br from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/30 animate-pulse' 
+                              : input.trim() 
+                                ? 'bg-gradient-to-br from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 active:scale-95' 
+                                : 'ios-glass-light text-white/30 cursor-not-allowed'
                         }`}
                 >
                       <Icon name={isLoading ? 'stop' : 'send'} size={20} />
                 </button>
               </div>
-          </TiltCard>
+          </div>
           
-          <div className="flex items-center justify-center gap-4 mt-3 text-[9px] font-mono text-white/20 tracking-[0.2em] uppercase">
-             <span>JAI-NN_OS_V3.0</span>
+          <div className="flex items-center justify-center gap-3 mt-3 text-[10px] text-white/20 font-medium">
+             <span>JAI-NN 3.0</span>
              <span className="w-1 h-1 rounded-full bg-white/20"></span>
-             <span>SECURE_CHANNEL</span>
+             <span>Powered by Gemini</span>
           </div>
     </div>
   );
