@@ -40,9 +40,9 @@ const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
                 </div>
                 <div className="space-y-1 text-[10px] text-white/40 h-20">
                     {step >= 1 && <div>{'>'} MOUNTING_NEURAL_FRAMEWORK... OK</div>}
-{step >= 1 && <div>{'>'} CONNECTING_TO_OLED_DISPLAY... OK</div>}
-{step >= 2 && <div>{'>'} LOADING_CORE_MODULES... OK</div>}
-{step >= 2 && <div className="animate-pulse">{'>'} INITIALIZING_CHATBOT_ENGINE...</div>}
+                    {step >= 1 && <div>{'>'} CONNECTING_TO_OLED_DISPLAY... OK</div>}
+                    {step >= 2 && <div>{'>'} LOADING_CORE_MODULES... OK</div>}
+                    {step >= 2 && <div className="animate-pulse">{'>'} INITIALIZING_CHATBOT_ENGINE...</div>}
                 </div>
             </div>
         )}
@@ -77,6 +77,7 @@ const App: React.FC = () => {
   const [settings, setSettings] = useState<UserSettings>({
     tier: Tier.Free,
     currentModel: ModelId.Flash,
+    theme: 'dark',
     accentColor: '#6366f1',
     dailyImageCount: 0,
     dailyImageLimit: 5,
@@ -181,7 +182,7 @@ const App: React.FC = () => {
 
   // Save session to Supabase
   const saveSession = async (session: ChatSession) => {
-    if (!supabase || !user) return;
+    if (!supabase || !user || user.id === 'guest') return;
 
     try {
       await supabase
@@ -213,14 +214,14 @@ const App: React.FC = () => {
       
       setSessions(prev => prev.map(s => s.id === currentSessionId ? updatedSession : s));
       
-      if (user) {
+      if (user && user.id !== 'guest') {
         saveSession(updatedSession);
       }
     }
   }, [messages, currentSessionId, user]);
 
   useEffect(() => {
-    if (user) {
+    if (user && user.id !== 'guest') {
       saveUserSettings();
     }
   }, [settings.dailyImageCount, settings.dailyTokenUsage, user]);
@@ -228,14 +229,21 @@ const App: React.FC = () => {
   const handleAuth = async () => {
       if (supabase) {
         await signInWithGoogle();
+        setLoginOpen(false);
       } else { 
+          // Guest mode
           setUser({ id: 'guest', name: 'Guest', email: 'guest@ai.com', avatar: '' }); 
           setLoginOpen(false); 
-          if(currentPage === 'landing') {
-             setCurrentPage('chat');
-             createNewChat();
-          }
+          setCurrentPage('chat');
+          createNewChat();
       }
+  };
+
+  const handleGuestMode = () => {
+      setUser({ id: 'guest', name: 'Guest', email: 'guest@ai.com', avatar: '' }); 
+      setLoginOpen(false); 
+      setCurrentPage('chat');
+      createNewChat();
   };
   
   const createNewChat = () => {
@@ -246,7 +254,7 @@ const App: React.FC = () => {
     setMessages([]);
     if (window.innerWidth < 768) setSidebarOpen(false);
     
-    if (user) {
+    if (user && user.id !== 'guest') {
       saveSession(newSession);
     }
   };
@@ -326,7 +334,8 @@ const App: React.FC = () => {
         <LoginModal 
             isOpen={isLoginOpen} 
             onClose={() => setLoginOpen(false)}
-            onLogin={handleAuth} 
+            onLogin={handleAuth}
+            onGuestMode={handleGuestMode}
         />
     </>
   );
@@ -344,35 +353,35 @@ const App: React.FC = () => {
         currentTier={settings.tier} onCloseMobile={() => setSidebarOpen(false)} onHome={() => setCurrentPage('landing')}
         onDeleteSession={async (id) => {
           setSessions(p => p.filter(s => s.id !== id));
-          if (supabase && user) {
+          if (supabase && user && user.id !== 'guest') {
             await supabase.from('chat_sessions').delete().eq('id', id);
           }
         }} 
         onRenameSession={async (id, newTitle) => {
           setSessions(p => p.map(s => s.id === id ? { ...s, title: newTitle } : s));
-          if (supabase && user) {
+          if (supabase && user && user.id !== 'guest') {
             await supabase.from('chat_sessions').update({ title: newTitle }).eq('id', id);
           }
         }}
         user={user}
         onSignOut={async () => {
-          if (supabase) await signOut();
+          if (supabase && user?.id !== 'guest') await signOut();
           setUser(null);
           setCurrentPage('landing');
         }}
       />
 
-      <div className="flex-1 bg-black relative h-full flex flex-col min-w-0">
+      <div className="flex-1 bg-black relative h-full flex flex-col min-w-0 overflow-hidden">
           <div className="w-full max-w-5xl mx-auto h-full flex flex-col relative z-10 border-x border-white/5">
             
-            <header className="flex-none h-16 flex items-center justify-between px-6">
+            <header className="flex-none h-16 flex items-center justify-between px-4 md:px-6 border-b border-white/5">
                 <button onClick={() => setSidebarOpen(!isSidebarOpen)} className="text-white/50 hover:text-white">
                     <Icon name="panel-left" size={24} />
                 </button>
-                <div className="flex gap-4">
-                    <button onClick={() => setModelSelectorOpen(true)} className="liquid-glass-nav rounded-full px-4 py-1.5 flex items-center gap-2 hover:bg-white/10 transition-colors border border-white/10">
+                <div className="flex gap-2 md:gap-4">
+                    <button onClick={() => setModelSelectorOpen(true)} className="liquid-glass-nav rounded-full px-3 md:px-4 py-1.5 flex items-center gap-2 hover:bg-white/10 transition-colors border border-white/10">
                         <span className="text-sm">{MODELS.find(m=>m.id===settings.currentModel)?.icon}</span>
-                        <span className="text-xs font-mono tracking-wider">{MODELS.find(m=>m.id===settings.currentModel)?.name}</span>
+                        <span className="text-xs font-mono tracking-wider hidden sm:inline">{MODELS.find(m=>m.id===settings.currentModel)?.name}</span>
                     </button>
                     <button onClick={() => setSettingsOpen(true)} className="liquid-glass-nav rounded-full w-9 h-9 flex items-center justify-center hover:bg-white/10 transition-colors border border-white/10">
                         {user?.avatar ? <img src={user.avatar} className="w-full h-full rounded-full object-cover" /> : <span className="font-bold text-xs">{user?.name[0]}</span>}
@@ -380,7 +389,7 @@ const App: React.FC = () => {
                 </div>
             </header>
 
-            <div className="flex-1 min-h-0 w-full overflow-y-auto px-6 py-6 scroll-smooth">
+            <div className="flex-1 min-h-0 w-full overflow-y-auto px-4 md:px-6 py-4 md:py-6 scroll-smooth">
                 {messages.length === 0 ? (
                     <div className="h-full flex flex-col items-center justify-center opacity-40">
                         <Icon name="logo" size={48} className="mb-4 text-indigo-500 animate-pulse-slow" />
@@ -393,7 +402,7 @@ const App: React.FC = () => {
                 <div ref={messagesEndRef} />
             </div>
 
-            <div className="flex-none w-full p-4 pb-6 bg-black">
+            <div className="flex-none w-full p-3 md:p-4 pb-4 md:pb-6 bg-black">
                 <InputArea onSend={handleSend} isLoading={isGenerating} onStop={() => setIsGenerating(false)} dailyImageCount={settings.dailyImageCount} userTier={settings.tier} onUpgradeTrigger={() => setPricingOpen(true)} />
             </div>
 
