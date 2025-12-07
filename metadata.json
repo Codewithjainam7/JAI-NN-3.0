@@ -1,7 +1,7 @@
 {
-  "name": "JAI-NN 2.0",
-  "description": "A modern AI assistant with iOS-style glassmorphism design, advanced code editing, and multi-model capabilities.",
-  "requestFramePermissions": [
-    "microphone"
-  ]
+  "name": "JAI-NN 3.0",
+  "version": "3.0.0",
+  "description": "A cutting-edge AI chatbot with glassmorphism design, multi-model support, Google OAuth, and advanced features. Built with React, TypeScript, and powered by Google Gemini AI.",
+  "author": "Jainam Jain",
+  "requestFramePermissions": []
 }
