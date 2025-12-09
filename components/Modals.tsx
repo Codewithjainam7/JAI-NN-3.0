@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { ModelId, Tier, UserSettings } from '../types';
-import { MODELS, PRICING_PLANS } from './constants';
+import { MODELS, PRICING_PLANS } from '../constants';
 import { Icon } from './Icon';
 import { JAINNLogo } from './JAINNLogo';
-
 // --- Login Modal ---
 interface LoginModalProps {
     isOpen: boolean;
