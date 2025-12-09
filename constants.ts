@@ -16,6 +16,7 @@ export const MODELS = [
     name: 'Gemini Flash 2.5',
     description: 'Fast responses, efficient',
     icon: '⚡',
+    iconName: 'zap',
     tiers: [Tier.Free, Tier.Pro, Tier.Ultra],
   },
   {
@@ -23,6 +24,7 @@ export const MODELS = [
     name: 'Gemini Pro 2.5',
     description: 'Advanced reasoning & logic',
     icon: '🔷',
+    iconName: 'cpu',
     tiers: [Tier.Pro, Tier.Ultra],
   },
 ];
@@ -33,16 +35,20 @@ export const PRICING_PLANS = [
     price: '$0',
     tier: Tier.Free,
     features: [
-      '2,000 tokens/day (60k/month)',
+      '2,000 tokens/day (~60k/month)',
       'Gemini Flash 2.5 Access',
       'Image Generation (5/day)',
+      'Voice Input',
+      'File Upload',
       'Chat History',
       'Community Support'
     ],
     unavailable: [
       'Model Switching',
-      'Advanced Logic (Pro)',
-      'Unlimited Context'
+      'Custom AI Instructions',
+      'Custom Quick Prompts',
+      'Advanced Color Themes',
+      'Priority Support'
     ],
     cta: 'Current Plan'
   },
@@ -54,15 +60,19 @@ export const PRICING_PLANS = [
     popular: true,
     features: [
       '100,000 tokens/month',
-      'Gemini Pro 2.5 & Flash',
+      'All Models (Flash & Pro)',
       'Unlimited Image Generation',
-      'Custom System Prompts',
+      'Custom System Instructions',
+      'Custom Quick Prompts',
+      'Advanced Color Themes',
       'Priority Responses',
-      'Smart Context Memory'
+      'Smart Context Memory',
+      'Priority Email Support'
     ],
     unavailable: [
       'Voice Mode 2.0',
-      'Dedicated Support'
+      'Dedicated Support',
+      'White-glove Onboarding'
     ],
     cta: 'Upgrade to Pro'
   },
@@ -74,10 +84,13 @@ export const PRICING_PLANS = [
     features: [
       'Unlimited Tokens',
       'Unlimited Everything',
+      'All Premium Features',
       'Real-time Voice Mode 2.0',
+      'Ultra Color Themes',
       'White-glove Onboarding',
       '24/7 Priority Support',
-      'Dedicated Compute Instance'
+      'Dedicated Compute Instance',
+      'Custom API Access'
     ],
     unavailable: [],
     cta: 'Upgrade to Ultra'
