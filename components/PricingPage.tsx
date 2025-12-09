@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon } from './Icon';
-import { PRICING_PLANS } from './constants';
-import { Tier } from './types';
+import { PRICING_PLANS } from '../constants';
+import { Tier } from '../types';
 
 interface PricingPageProps {
   onBack: () => void;
