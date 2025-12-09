@@ -1,7 +1,6 @@
 import React from 'react';
 import { Icon } from './Icon';
-import { CREATOR_INFO } from './constants';
-
+import { CREATOR_INFO } from '../constants';
 interface CreatorPageProps {
   onBack: () => void;
 }
