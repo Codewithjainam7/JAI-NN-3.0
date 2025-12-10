@@ -28,7 +28,7 @@ const BootSequence = ({ onComplete }: { onComplete: () => void }) => {
       <div className="relative mb-6">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 rounded-full blur-3xl opacity-60 animate-pulse"></div>
         <div className="relative animate-float">
-          <JAINNLogo size={120} animated />
+          <JAINNLogo size={120} />
         </div>
       </div>
       <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent animate-pulse mb-2">
