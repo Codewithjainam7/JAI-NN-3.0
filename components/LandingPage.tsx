@@ -24,8 +24,8 @@ const MOCK_PROMPTS = [
 ];
 
 const EVOLUTION_IMAGES = [
-  "https://image.pollinations.ai/prompt/futuristic%20AI%20neural%20network%20glowing%20connections?width=400&height=400&nologo=true&model=flux",
-  "https://image.pollinations.ai/prompt/abstract%20digital%20evolution%20concept%20blue%20purple?width=400&height=400&nologo=true&model=flux",
+  "https://image.pollinations.ai/prompt/futuristic%20AI%20neural%20network%20glowing%20connections?width=400&height=400&nologo=true&model=flux&seed=12345",
+  "https://image.pollinations.ai/prompt/abstract%20digital%20evolution%20concept%20blue%20purple?width=400&height=400&nologo=true&model=flux&seed=67890",
 ];
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate }) => {
@@ -47,9 +47,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
 
   const randomImages = useMemo(() => {
     const shuffled = [...MOCK_PROMPTS].sort(() => 0.5 - Math.random());
-    return shuffled.slice(0, 2).map(p => ({
+    return shuffled.slice(0, 2).map((p, idx) => ({
       prompt: p,
-      url: `https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=800&height=800&nologo=true&model=flux&seed=${Math.random()}`
+      url: `https://image.pollinations.ai/prompt/${encodeURIComponent(p)}?width=800&height=800&nologo=true&model=flux&seed=${Math.floor(Math.random() * 10000)}`
     }));
   }, []);
 
@@ -106,31 +106,29 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
           <JAINNLogo size={120} />
         </div>
         
-        {/* Animated Title - Fixed */}
+        {/* Fixed Animated Title */}
         <div className="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 delay-200 mb-6 text-center">
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-2">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-4">
             Artificial Intelligence
           </h1>
           
-          {/* Evolution Text with Image Animation */}
-          <div className="relative inline-block">
-            <div className="text-4xl sm:text-5xl md:text-7xl font-bold relative flex items-center justify-center gap-2">
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Ev</span>
-              <span className="inline-block relative w-16 h-16 md:w-20 md:h-20 align-middle overflow-hidden rounded-lg border-2 border-white/20">
-                <div className="animate-scroll-infinite flex h-full" style={{ width: '300%' }}>
-                  {[...EVOLUTION_IMAGES, ...EVOLUTION_IMAGES, ...EVOLUTION_IMAGES].map((url, i) => (
+          {/* Evolution Text with Proper Image Animation */}
+          <div className="relative inline-flex items-center justify-center gap-2 text-4xl sm:text-5xl md:text-7xl font-bold">
+            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Ev</span>
+            <div className="inline-block relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 align-middle overflow-hidden rounded-lg border-2 border-white/20">
+              <div className="absolute inset-0 flex animate-scroll-infinite" style={{ width: '300%' }}>
+                {[...EVOLUTION_IMAGES, ...EVOLUTION_IMAGES, ...EVOLUTION_IMAGES].map((url, i) => (
+                  <div key={i} className="flex-shrink-0" style={{ width: '33.333%' }}>
                     <img 
-                      key={i}
                       src={url} 
                       alt="" 
                       className="w-full h-full object-cover"
-                      style={{ minWidth: '33.333%' }}
                     />
-                  ))}
-                </div>
-              </span>
-              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">lution</span>
+                  </div>
+                ))}
+              </div>
             </div>
+            <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">lution</span>
           </div>
         </div>
         
@@ -150,25 +148,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
         </button>
       </section>
 
-      {/* Features Section */}
+      {/* Features Section - Fixed Grid */}
       <section className="relative z-10 pb-20 sm:pb-32 px-4 sm:px-6 max-w-7xl mx-auto">
         <div className="mb-12 text-center animate-on-scroll opacity-0 translate-y-10 transition-all">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">Core Capabilities</h2>
           <p className="text-white/40 text-xs sm:text-sm">MODULES ACTIVE: {FEATURE_CARDS.length}/{FEATURE_CARDS.length}</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {FEATURE_CARDS.map((feature, i) => (
             <TiltCard 
               key={i} 
-              className={`bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 hover:border-white/30`} 
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 hover:border-white/30 h-full flex flex-col" 
               style={{ transitionDelay: `${i * 100}ms` }}
             >
-              <div className={`w-12 h-12 rounded-xl bg-${feature.color}-500/10 border border-${feature.color}-500/20 flex items-center justify-center mb-6 text-${feature.color}-400`}>
+              <div className={`w-12 h-12 rounded-xl bg-${feature.color}-500/10 border border-${feature.color}-500/20 flex items-center justify-center mb-4 text-${feature.color}-400`}>
                 <Icon name={feature.icon as any} size={24} />
               </div>
-              <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-              <p className="text-white/60 text-sm leading-relaxed">{feature.desc}</p>
+              <h3 className="text-lg sm:text-xl font-bold mb-2">{feature.title}</h3>
+              <p className="text-white/60 text-sm leading-relaxed flex-1">{feature.desc}</p>
             </TiltCard>
           ))}
         </div>
