@@ -103,10 +103,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
         </div>
         
         <div className="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 delay-100 mb-6">
-          <JAINNLogo size={120} animated />
+          <JAINNLogo size={120} />
         </div>
         
-        {/* Animated Title */}
+        {/* Animated Title - Fixed */}
         <div className="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 delay-200 mb-6 text-center">
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-2">
             Artificial Intelligence
@@ -114,26 +114,22 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
           
           {/* Evolution Text with Image Animation */}
           <div className="relative inline-block">
-            <div className="text-4xl sm:text-5xl md:text-7xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent relative">
-              <span className="relative inline-block">
-                Ev
-                <span className="inline-block relative mx-1" style={{ width: '1em', height: '1em', verticalAlign: 'middle' }}>
-                  <div className="absolute inset-0 overflow-hidden rounded-lg">
-                    <div className="animate-scroll-infinite flex" style={{ width: '300%' }}>
-                      {[...EVOLUTION_IMAGES, ...EVOLUTION_IMAGES, ...EVOLUTION_IMAGES].map((url, i) => (
-                        <img 
-                          key={i}
-                          src={url} 
-                          alt="" 
-                          className="w-full h-full object-cover"
-                          style={{ minWidth: '33.333%' }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </span>
-                lution
+            <div className="text-4xl sm:text-5xl md:text-7xl font-bold relative flex items-center justify-center gap-2">
+              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Ev</span>
+              <span className="inline-block relative w-16 h-16 md:w-20 md:h-20 align-middle overflow-hidden rounded-lg border-2 border-white/20">
+                <div className="animate-scroll-infinite flex h-full" style={{ width: '300%' }}>
+                  {[...EVOLUTION_IMAGES, ...EVOLUTION_IMAGES, ...EVOLUTION_IMAGES].map((url, i) => (
+                    <img 
+                      key={i}
+                      src={url} 
+                      alt="" 
+                      className="w-full h-full object-cover"
+                      style={{ minWidth: '33.333%' }}
+                    />
+                  ))}
+                </div>
               </span>
+              <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">lution</span>
             </div>
           </div>
         </div>
