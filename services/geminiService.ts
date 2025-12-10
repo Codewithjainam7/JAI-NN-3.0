@@ -1,10 +1,14 @@
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { Message, ModelId } from "../types";
 import { SYSTEM_INSTRUCTION } from "../constants";
 
-// We initialize the client per request to ensure we can swap keys if needed in future features
-// API key must be obtained from process.env.API_KEY
-const getClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
+const getClient = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    throw new Error("VITE_GEMINI_API_KEY is not set");
+  }
+  return new GoogleGenerativeAI(apiKey);
+};
 
 export const streamChatResponse = async (
   messages: Message[],
@@ -12,39 +16,38 @@ export const streamChatResponse = async (
   onChunk: (text: string) => void
 ): Promise<string> => {
   try {
-    const ai = getClient();
+    const genAI = getClient();
     
+    // Get the generative model
+    const model = genAI.getGenerativeModel({ 
+      model: modelId,
+      systemInstruction: SYSTEM_INSTRUCTION,
+    });
+
     // Transform messages to Gemini format
-    // We only take the last few messages to manage context window if needed, 
-    // but for now we send the history.
-    // Note: The first message should ideally be the system instruction, but 
-    // the SDK handles systemInstruction separately in config.
-    
-    const contents = messages.map(m => ({
-      role: m.role,
+    const history = messages.slice(0, -1).map(m => ({
+      role: m.role === 'model' ? 'model' : 'user',
       parts: [{ text: m.text }]
     }));
 
-    const chat = ai.chats.create({
-      model: modelId,
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
+    const chat = model.startChat({
+      history,
+      generationConfig: {
         temperature: 0.7,
+        maxOutputTokens: 2048,
       },
-      history: contents.slice(0, -1), // Everything except the last new message
     });
 
-    const lastMessage = contents[contents.length - 1].parts[0].text;
+    const lastMessage = messages[messages.length - 1].text;
     
-    const result = await chat.sendMessageStream({
-        message: lastMessage
-    });
+    // Stream the response
+    const result = await chat.sendMessageStream(lastMessage);
 
     let fullText = "";
-    for await (const chunk of result) {
-      const text = chunk.text;
-      if (text) {
-        fullText += text;
+    for await (const chunk of result.stream) {
+      const chunkText = chunk.text();
+      if (chunkText) {
+        fullText += chunkText;
         onChunk(fullText);
       }
     }
