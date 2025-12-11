@@ -55,4 +55,8 @@ export interface UserSettings {
   dailyTokenLimit: number;
   systemInstruction?: string;
   customStarters?: string[];
+  responseStyle?: 'balanced' | 'detailed' | 'concise' | 'creative';
+  autoSaveChats?: boolean;
+  soundEffects?: boolean;
+  compactMode?: boolean;
 }
