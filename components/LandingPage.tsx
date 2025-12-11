@@ -71,12 +71,6 @@ const MOCK_PROMPTS = [
   "Digital brain made of light particles, neural connections, sci-fi illustration",
 ];
 
-const EVOLUTION_IMAGES = [
-  "https://image.pollinations.ai/prompt/futuristic%20AI%20neural%20network%20glowing%20connections?width=400&height=400&nologo=true&model=flux&seed=12345",
-  "https://image.pollinations.ai/prompt/abstract%20digital%20evolution%20concept%20blue%20purple?width=400&height=400&nologo=true&model=flux&seed=67890",
-  "https://image.pollinations.ai/prompt/digital%20brain%20neural%20pathways%20cyberpunk?width=400&height=400&nologo=true&model=flux&seed=54321",
-];
-
 export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate }) => {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
@@ -162,25 +156,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
           </h1>
           
           {/* Fixed Evolution with Proper Image Cycling */}
-          <div className="relative inline-flex items-center justify-center gap-1 sm:gap-2 text-4xl sm:text-5xl md:text-7xl font-bold">
+          <div className="relative inline-flex items-center justify-center gap-2 text-4xl sm:text-5xl md:text-7xl font-bold">
             <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Ev</span>
             
-            {/* Image Container with Fixed Dimensions */}
-            <div className="inline-block relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 overflow-hidden rounded-xl border-2 border-white/20 align-middle mx-1" style={{ verticalAlign: 'middle' }}>
-              <div className="absolute inset-0 flex" style={{ 
-                width: '300%',
-                animation: 'scrollImages 15s linear infinite'
-              }}>
-                {EVOLUTION_IMAGES.concat(EVOLUTION_IMAGES).map((url, i) => (
-                  <div key={i} className="flex-shrink-0" style={{ width: '16.666%' }}>
-                    <img 
-                      src={url} 
-                      alt="" 
-                      className="w-full h-full object-cover"
-                      style={{ width: '100%', height: '100%' }}
-                    />
-                  </div>
-                ))}
+            {/* Image Container - FIXED VERSION */}
+            <div className="inline-block relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 overflow-hidden rounded-xl border-2 border-white/20 mx-1" style={{ verticalAlign: 'middle' }}>
+              <div className="evolution-slider">
+                <img src="https://image.pollinations.ai/prompt/futuristic%20AI%20neural%20network%20glowing%20connections?width=400&height=400&nologo=true&model=flux&seed=12345" alt="" className="evolution-img" />
+                <img src="https://image.pollinations.ai/prompt/abstract%20digital%20evolution%20concept%20blue%20purple?width=400&height=400&nologo=true&model=flux&seed=67890" alt="" className="evolution-img" />
+                <img src="https://image.pollinations.ai/prompt/digital%20brain%20neural%20pathways%20cyberpunk?width=400&height=400&nologo=true&model=flux&seed=54321" alt="" className="evolution-img" />
               </div>
             </div>
             
@@ -267,14 +251,39 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
         <p>JAI-NN 3.0 • Powered by Gemini 2.5 • Built with ❤️</p>
       </footer>
       
-      {/* Custom Keyframe for Image Scrolling */}
+      {/* Custom Keyframe for Evolution Animation */}
       <style>{`
-        @keyframes scrollImages {
+        .evolution-slider {
+          display: flex;
+          width: 300%;
+          animation: evolutionScroll 9s linear infinite;
+        }
+        
+        .evolution-img {
+          width: 33.333%;
+          height: 100%;
+          object-fit: cover;
+          flex-shrink: 0;
+        }
+        
+        @keyframes evolutionScroll {
           0% {
             transform: translateX(0);
           }
+          33.333% {
+            transform: translateX(0);
+          }
+          36.666% {
+            transform: translateX(-33.333%);
+          }
+          66.666% {
+            transform: translateX(-33.333%);
+          }
+          70% {
+            transform: translateX(-66.666%);
+          }
           100% {
-            transform: translateX(-50%);
+            transform: translateX(-66.666%);
           }
         }
       `}</style>
