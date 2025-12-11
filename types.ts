@@ -56,7 +56,7 @@ export interface UserSettings {
   systemInstruction?: string;
   customStarters?: string[];
   responseStyle?: 'balanced' | 'detailed' | 'concise' | 'creative';
-  autoSaveChats?: boolean;
-  soundEffects?: boolean;
-  compactMode?: boolean;
+autoSaveChats?: boolean;
+soundEffects?: boolean;
+compactMode?: boolean;
 }
