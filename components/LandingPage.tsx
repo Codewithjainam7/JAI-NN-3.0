@@ -9,15 +9,60 @@ interface LandingPageProps {
 }
 
 const FEATURE_CARDS = [
-  { icon: "brain", color: "blue", title: "Multi-Model Intelligence", desc: "Switch seamlessly between Gemini Flash 2.5 and Pro 2.5 for optimal performance across different tasks." },
-  { icon: "sparkles", color: "purple", title: "AI Image Generation", desc: "Create stunning visuals from text descriptions with unlimited daily generations on Pro and Ultra tiers." },
-  { icon: "code", color: "pink", title: "Advanced Code Assistant", desc: "Write, debug, and optimize code with syntax highlighting, multi-language support, and intelligent suggestions." },
-  { icon: "mic", color: "emerald", title: "Voice Input", desc: "Speak naturally with real-time voice transcription and conversational responses for hands-free interaction." },
-  { icon: "zap", color: "indigo", title: "Real-Time Streaming", desc: "Experience lightning-fast responses with token-by-token streaming for fluid, natural conversations." },
-  { icon: "palette", color: "cyan", title: "Personalized Themes", desc: "Customize your experience with multiple accent colors and themes that adapt to your preferences." },
-  { icon: "paperclip", color: "orange", title: "Multi-File Support", desc: "Upload and analyze images, PDFs, and documents with intelligent context extraction and processing." },
-  { icon: "shield", color: "rose", title: "Persistent History", desc: "Your conversations are securely saved and synced across devices with Google OAuth authentication." },
-  { icon: "volume", color: "violet", title: "Context Awareness", desc: "Maintains conversation context across sessions for coherent, meaningful long-form discussions." },
+  { 
+    icon: "brain", 
+    color: "from-blue-500 to-cyan-500", 
+    title: "Multi-Model Intelligence", 
+    desc: "Switch seamlessly between Gemini Flash 2.5 and Pro 2.5 for optimal performance across different tasks." 
+  },
+  { 
+    icon: "sparkles", 
+    color: "from-purple-500 to-pink-500", 
+    title: "AI Image Generation", 
+    desc: "Create stunning visuals from text descriptions with Flux model. Unlimited daily generations on Pro tier." 
+  },
+  { 
+    icon: "code", 
+    color: "from-pink-500 to-rose-500", 
+    title: "Advanced Code Assistant", 
+    desc: "Write, debug, and optimize code with syntax highlighting and intelligent suggestions across multiple languages." 
+  },
+  { 
+    icon: "mic", 
+    color: "from-emerald-500 to-teal-500", 
+    title: "Voice Input", 
+    desc: "Speak naturally with real-time voice transcription for hands-free interaction and accessibility." 
+  },
+  { 
+    icon: "zap", 
+    color: "from-indigo-500 to-purple-500", 
+    title: "Real-Time Streaming", 
+    desc: "Experience lightning-fast responses with token-by-token streaming for fluid conversations." 
+  },
+  { 
+    icon: "palette", 
+    color: "from-cyan-500 to-blue-500", 
+    title: "Personalized Themes", 
+    desc: "Customize with multiple accent colors and glassmorphism UI that adapts to your preferences." 
+  },
+  { 
+    icon: "paperclip", 
+    color: "from-orange-500 to-amber-500", 
+    title: "Multi-File Support", 
+    desc: "Upload and analyze images, PDFs, and documents with intelligent context extraction." 
+  },
+  { 
+    icon: "shield", 
+    color: "from-rose-500 to-red-500", 
+    title: "Persistent History", 
+    desc: "Your conversations are securely saved and synced across devices with Google OAuth." 
+  },
+  { 
+    icon: "cpu", 
+    color: "from-violet-500 to-purple-500", 
+    title: "Context Awareness", 
+    desc: "Maintains conversation context across sessions for coherent, meaningful discussions." 
+  },
 ];
 
 const MOCK_PROMPTS = [
@@ -110,28 +155,35 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
           <JAINNLogo size={120} />
         </div>
         
-        {/* Fixed Animated Title */}
+        {/* Fixed Title and Evolution Animation */}
         <div className="animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 delay-200 mb-6 text-center">
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-4">
             Artificial Intelligence
           </h1>
           
-          {/* Fixed Evolution Text with Proper Image Animation */}
+          {/* Fixed Evolution with Proper Image Cycling */}
           <div className="relative inline-flex items-center justify-center gap-1 sm:gap-2 text-4xl sm:text-5xl md:text-7xl font-bold">
             <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Ev</span>
-            <div className="inline-block relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 overflow-hidden rounded-lg border-2 border-white/20 align-middle mx-0.5">
-              <div className="absolute inset-0 flex animate-scroll-infinite" style={{ width: '300%' }}>
-                {[...EVOLUTION_IMAGES, ...EVOLUTION_IMAGES, ...EVOLUTION_IMAGES].map((url, i) => (
-                  <div key={i} className="flex-shrink-0 w-full h-full" style={{ width: '33.333%' }}>
+            
+            {/* Image Container with Fixed Dimensions */}
+            <div className="inline-block relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 overflow-hidden rounded-xl border-2 border-white/20 align-middle mx-1" style={{ verticalAlign: 'middle' }}>
+              <div className="absolute inset-0 flex" style={{ 
+                width: '300%',
+                animation: 'scrollImages 15s linear infinite'
+              }}>
+                {EVOLUTION_IMAGES.concat(EVOLUTION_IMAGES).map((url, i) => (
+                  <div key={i} className="flex-shrink-0" style={{ width: '16.666%' }}>
                     <img 
                       src={url} 
                       alt="" 
                       className="w-full h-full object-cover"
+                      style={{ width: '100%', height: '100%' }}
                     />
                   </div>
                 ))}
               </div>
             </div>
+            
             <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">lution</span>
           </div>
         </div>
@@ -154,22 +206,27 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
 
       {/* Features Section */}
       <section className="relative z-10 pb-20 sm:pb-32 px-4 sm:px-6 max-w-7xl mx-auto">
-        <div className="mb-12 text-center animate-on-scroll opacity-0 translate-y-10 transition-all">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Powerful Features</h2>
-          <p className="text-white/40 text-xs sm:text-sm">Everything you need for advanced AI interactions</p>
+        <div className="mb-16 text-center animate-on-scroll opacity-0 translate-y-10 transition-all">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 text-[10px] tracking-wider text-purple-400 mb-6">
+            <Icon name="sparkles" size={12} />
+            POWERFUL CAPABILITIES
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Everything You Need</h2>
+          <p className="text-white/40 text-sm sm:text-base max-w-2xl mx-auto">Advanced AI features designed for creators, developers, and innovators</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {FEATURE_CARDS.map((feature, i) => (
             <TiltCard 
               key={i} 
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 hover:border-white/30 h-full flex flex-col" 
+              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-6 sm:p-8 animate-on-scroll opacity-0 translate-y-10 transition-all duration-700 hover:border-white/30 h-full flex flex-col group" 
               style={{ transitionDelay: `${i * 100}ms` }}
             >
-              <div className={`w-12 h-12 rounded-xl bg-${feature.color}-500/10 border border-${feature.color}-500/20 flex items-center justify-center mb-4 text-${feature.color}-400`}>
-                <Icon name={feature.icon as any} size={24} />
+              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} bg-opacity-10 flex items-center justify-center mb-5 relative overflow-hidden`}>
+                <div className={`absolute inset-0 bg-gradient-to-br ${feature.color} opacity-10 group-hover:opacity-20 transition-opacity`}></div>
+                <Icon name={feature.icon as any} size={24} className="relative z-10" />
               </div>
-              <h3 className="text-lg sm:text-xl font-bold mb-2">{feature.title}</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-3">{feature.title}</h3>
               <p className="text-white/60 text-sm leading-relaxed flex-1">{feature.desc}</p>
             </TiltCard>
           ))}
@@ -178,9 +235,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
 
       {/* Image Generation Showcase */}
       <section className="relative z-10 pb-20 sm:pb-32 px-4 sm:px-6 max-w-7xl mx-auto">
-        <div className="mb-12 text-center animate-on-scroll opacity-0 translate-y-10 transition-all">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">AI Image Generation</h2>
-          <p className="text-white/40 text-xs sm:text-sm">Powered by Flux Model - Create stunning visuals from text</p>
+        <div className="mb-16 text-center animate-on-scroll opacity-0 translate-y-10 transition-all">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-pink-500/30 bg-pink-500/10 text-[10px] tracking-wider text-pink-400 mb-6">
+            <Icon name="image" size={12} />
+            AI IMAGE GENERATION
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">Create Visual Magic</h2>
+          <p className="text-white/40 text-sm sm:text-base max-w-2xl mx-auto">Powered by Flux Model - Transform text into stunning visuals instantly</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 animate-on-scroll opacity-0 translate-y-10 transition-all">
@@ -205,6 +266,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
       <footer className="border-t border-white/10 py-8 text-center text-white/40 text-xs sm:text-sm px-4">
         <p>JAI-NN 3.0 • Powered by Gemini 2.5 • Built with ❤️</p>
       </footer>
+      
+      {/* Custom Keyframe for Image Scrolling */}
+      <style>{`
+        @keyframes scrollImages {
+          0% {
+            transform: translateX(0);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+      `}</style>
     </div>
   );
 };
