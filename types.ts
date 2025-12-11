@@ -26,8 +26,8 @@ export interface ChatSession {
 }
 
 export enum ModelId {
-  Flash = 'gemini-2.0-flash-exp',
-  Pro = 'gemini-1.5-pro-latest',
+  Flash = 'gemini-2.0-flash-lite',
+  Pro = 'gemini-2.5-pro-latest',
 }
 
 export enum Tier {
