@@ -38,6 +38,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
 
   const canUseSystemInstructions = settings.tier !== Tier.Free;
   const canUseCustomPrompts = settings.tier !== Tier.Free;
+  const canUseAdvancedSettings = settings.tier !== Tier.Free;
 
   const handleAddPrompt = () => {
     if (newPrompt.trim() && customPrompts.length < 10) {
@@ -57,7 +58,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={onClose}></div>
-      <div className="relative w-full max-w-2xl smoked-glass rounded-[2rem] p-6 sm:p-8 animate-slide-up max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_0_50px_rgba(10,132,255,0.1)] border border-white/10">
+      <div className="relative w-full max-w-2xl smoked-glass rounded-3xl p-6 sm:p-8 animate-slide-up max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_0_50px_rgba(10,132,255,0.1)] border border-white/10">
         
         <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
             <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-3">
@@ -116,6 +117,99 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
                         </button>
                     );
                 })}
+            </div>
+        </div>
+
+        {/* Response Style */}
+        <div className="mb-8">
+            <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">Response Style</h3>
+            <div className="grid grid-cols-2 gap-3">
+                {[
+                    { id: 'balanced', name: 'Balanced', desc: 'Mix of detail and brevity', icon: 'sparkles' },
+                    { id: 'detailed', name: 'Detailed', desc: 'Comprehensive explanations', icon: 'brain' },
+                    { id: 'concise', name: 'Concise', desc: 'Quick and to the point', icon: 'zap' },
+                    { id: 'creative', name: 'Creative', desc: 'Imaginative responses', icon: 'palette' }
+                ].map(style => (
+                    <button
+                        key={style.id}
+                        onClick={() => onUpdateSettings({ responseStyle: style.id as any })}
+                        className={`p-4 rounded-xl border transition-all text-left ${
+                            settings.responseStyle === style.id || (!settings.responseStyle && style.id === 'balanced')
+                                ? 'bg-white/10 border-white/30 shadow-lg' 
+                                : 'bg-transparent hover:bg-white/5 border-white/10'
+                        }`}
+                    >
+                        <Icon name={style.icon as any} size={18} className="mb-2 text-blue-400" />
+                        <div className="font-semibold text-sm text-white mb-1">{style.name}</div>
+                        <div className="text-xs text-white/50">{style.desc}</div>
+                    </button>
+                ))}
+            </div>
+        </div>
+
+        {/* Behavior Toggles */}
+        <div className="mb-8">
+            <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">Preferences</h3>
+            <div className="space-y-3">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="flex items-center gap-3">
+                        <Icon name="download" size={18} className="text-white/60" />
+                        <div>
+                            <div className="font-medium text-sm text-white">Auto-save Chats</div>
+                            <div className="text-xs text-white/40">Save conversations automatically</div>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => onUpdateSettings({ autoSaveChats: !settings.autoSaveChats })}
+                        className={`w-12 h-6 rounded-full transition-colors relative ${
+                            settings.autoSaveChats !== false ? 'bg-blue-500' : 'bg-white/20'
+                        }`}
+                    >
+                        <div className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform ${
+                            settings.autoSaveChats !== false ? 'translate-x-6' : 'translate-x-0.5'
+                        }`}></div>
+                    </button>
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="flex items-center gap-3">
+                        <Icon name="volume" size={18} className="text-white/60" />
+                        <div>
+                            <div className="font-medium text-sm text-white">Sound Effects</div>
+                            <div className="text-xs text-white/40">Play interaction sounds</div>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => onUpdateSettings({ soundEffects: !settings.soundEffects })}
+                        className={`w-12 h-6 rounded-full transition-colors relative ${
+                            settings.soundEffects ? 'bg-blue-500' : 'bg-white/20'
+                        }`}
+                    >
+                        <div className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform ${
+                            settings.soundEffects ? 'translate-x-6' : 'translate-x-0.5'
+                        }`}></div>
+                    </button>
+                </div>
+
+                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
+                    <div className="flex items-center gap-3">
+                        <Icon name="panel-left" size={18} className="text-white/60" />
+                        <div>
+                            <div className="font-medium text-sm text-white">Compact Mode</div>
+                            <div className="text-xs text-white/40">Reduce spacing and padding</div>
+                        </div>
+                    </div>
+                    <button
+                        onClick={() => onUpdateSettings({ compactMode: !settings.compactMode })}
+                        className={`w-12 h-6 rounded-full transition-colors relative ${
+                            settings.compactMode ? 'bg-blue-500' : 'bg-white/20'
+                        }`}
+                    >
+                        <div className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform ${
+                            settings.compactMode ? 'translate-x-6' : 'translate-x-0.5'
+                        }`}></div>
+                    </button>
+                </div>
             </div>
         </div>
 
