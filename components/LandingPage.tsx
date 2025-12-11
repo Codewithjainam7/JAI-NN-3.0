@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useMemo } from 'react';
 import { Icon } from './Icon';
 import { JAINNLogo } from './JAINNLogo';
 import { TiltCard } from './TiltCard';
+import type { Page } from '../types';
 
 interface LandingPageProps {
   onEnter: () => void;
