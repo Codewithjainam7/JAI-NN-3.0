@@ -9,12 +9,15 @@ interface LandingPageProps {
 }
 
 const FEATURE_CARDS = [
-  { icon: "cpu", color: "blue", title: "Neural Processing", desc: "Advanced reasoning with Gemini 2.5 architecture for complex problem solving and creative tasks." },
-  { icon: "sparkles", color: "purple", title: "Image Synthesis", desc: "Generate stunning visuals from text descriptions using cutting-edge AI image generation." },
-  { icon: "code", color: "pink", title: "Code Generation", desc: "Write, debug, and optimize code across multiple programming languages with AI assistance." },
-  { icon: "globe", color: "emerald", title: "Multi-Modal AI", desc: "Process text, images, and code seamlessly in a unified conversational interface." },
-  { icon: "zap", color: "indigo", title: "Lightning Fast", desc: "Optimized for speed with real-time streaming responses and instant contextual feedback." },
-  { icon: "mic", color: "cyan", title: "Voice Input", desc: "Speak naturally and let AI transcribe and respond to your voice commands instantly." },
+  { icon: "brain", color: "blue", title: "Multi-Model Intelligence", desc: "Switch seamlessly between Gemini Flash 2.5 and Pro 2.5 for optimal performance across different tasks." },
+  { icon: "sparkles", color: "purple", title: "AI Image Generation", desc: "Create stunning visuals from text descriptions with unlimited daily generations on Pro and Ultra tiers." },
+  { icon: "code", color: "pink", title: "Advanced Code Assistant", desc: "Write, debug, and optimize code with syntax highlighting, multi-language support, and intelligent suggestions." },
+  { icon: "mic", color: "emerald", title: "Voice Input", desc: "Speak naturally with real-time voice transcription and conversational responses for hands-free interaction." },
+  { icon: "zap", color: "indigo", title: "Real-Time Streaming", desc: "Experience lightning-fast responses with token-by-token streaming for fluid, natural conversations." },
+  { icon: "palette", color: "cyan", title: "Personalized Themes", desc: "Customize your experience with multiple accent colors and themes that adapt to your preferences." },
+  { icon: "paperclip", color: "orange", title: "Multi-File Support", desc: "Upload and analyze images, PDFs, and documents with intelligent context extraction and processing." },
+  { icon: "shield", color: "rose", title: "Persistent History", desc: "Your conversations are securely saved and synced across devices with Google OAuth authentication." },
+  { icon: "volume", color: "violet", title: "Context Awareness", desc: "Maintains conversation context across sessions for coherent, meaningful long-form discussions." },
 ];
 
 const MOCK_PROMPTS = [
@@ -26,6 +29,7 @@ const MOCK_PROMPTS = [
 const EVOLUTION_IMAGES = [
   "https://image.pollinations.ai/prompt/futuristic%20AI%20neural%20network%20glowing%20connections?width=400&height=400&nologo=true&model=flux&seed=12345",
   "https://image.pollinations.ai/prompt/abstract%20digital%20evolution%20concept%20blue%20purple?width=400&height=400&nologo=true&model=flux&seed=67890",
+  "https://image.pollinations.ai/prompt/digital%20brain%20neural%20pathways%20cyberpunk?width=400&height=400&nologo=true&model=flux&seed=54321",
 ];
 
 export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate }) => {
@@ -54,7 +58,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
   }, []);
 
   return (
-    <div className="min-h-screen w-full text-white font-sans selection:bg-indigo-500/30 overflow-x-hidden bg-black relative">
+    <div className="min-h-screen w-full text-white font-sans selection:bg-indigo-500/30 overflow-x-hidden overflow-y-auto bg-black relative">
       
       {/* iOS 26 Inspired Background */}
       <div className="fixed inset-0 z-0 pointer-events-none ios26-gradient">
@@ -112,13 +116,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
             Artificial Intelligence
           </h1>
           
-          {/* Evolution Text with Proper Image Animation */}
-          <div className="relative inline-flex items-center justify-center gap-2 text-4xl sm:text-5xl md:text-7xl font-bold">
+          {/* Fixed Evolution Text with Proper Image Animation */}
+          <div className="relative inline-flex items-center justify-center gap-1 sm:gap-2 text-4xl sm:text-5xl md:text-7xl font-bold">
             <span className="bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Ev</span>
-            <div className="inline-block relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 align-middle overflow-hidden rounded-lg border-2 border-white/20">
+            <div className="inline-block relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 overflow-hidden rounded-lg border-2 border-white/20 align-middle mx-0.5">
               <div className="absolute inset-0 flex animate-scroll-infinite" style={{ width: '300%' }}>
                 {[...EVOLUTION_IMAGES, ...EVOLUTION_IMAGES, ...EVOLUTION_IMAGES].map((url, i) => (
-                  <div key={i} className="flex-shrink-0" style={{ width: '33.333%' }}>
+                  <div key={i} className="flex-shrink-0 w-full h-full" style={{ width: '33.333%' }}>
                     <img 
                       src={url} 
                       alt="" 
@@ -148,11 +152,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onEnter, onNavigate })
         </button>
       </section>
 
-      {/* Features Section - Fixed Grid */}
+      {/* Features Section */}
       <section className="relative z-10 pb-20 sm:pb-32 px-4 sm:px-6 max-w-7xl mx-auto">
         <div className="mb-12 text-center animate-on-scroll opacity-0 translate-y-10 transition-all">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Core Capabilities</h2>
-          <p className="text-white/40 text-xs sm:text-sm">MODULES ACTIVE: {FEATURE_CARDS.length}/{FEATURE_CARDS.length}</p>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Powerful Features</h2>
+          <p className="text-white/40 text-xs sm:text-sm">Everything you need for advanced AI interactions</p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
