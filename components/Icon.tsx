@@ -50,17 +50,19 @@ export const Icon: React.FC<IconProps> = ({ name, className = "", size = 20 }) =
   };
 
   return (
-    <svg 
-      width={size} 
-      height={size} 
-      viewBox="0 0 24 24" 
-      fill={isLogo ? 'none' : 'currentColor'} 
-      stroke={isLogo ? 'currentColor' : 'none'}
-      strokeWidth={isLogo ? 2 : 0}
-      className={className}
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      {icons[name] || icons['sparkles']}
-    </svg>
-  );
+  <svg 
+    width={size} 
+    height={size} 
+    viewBox="0 0 24 24" 
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    {icons[name] || icons['sparkles']}
+  </svg>
+);
 };
