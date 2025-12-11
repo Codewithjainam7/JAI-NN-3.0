@@ -10,7 +10,7 @@ interface PricingPageProps {
 
 export const PricingPage: React.FC<PricingPageProps> = ({ onBack, onSelectTier }) => {
   return (
-    <div className="min-h-screen w-full bg-black text-white font-sans overflow-y-auto selection:bg-indigo-500/30">
+    <div className="min-h-screen w-full bg-black text-white font-sans overflow-y-auto overflow-x-hidden selection:bg-indigo-500/30 relative">
        
        <div className="fixed inset-0 z-0 pointer-events-none ios26-gradient">
           <div className="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-indigo-900/10 rounded-full blur-[120px]"></div>
