@@ -1,13 +1,14 @@
 import React from 'react';
 import { Icon } from './Icon';
 import { CREATOR_INFO } from '../constants';
+
 interface CreatorPageProps {
   onBack: () => void;
 }
 
 export const CreatorPage: React.FC<CreatorPageProps> = ({ onBack }) => {
   return (
-    <div className="min-h-screen w-full bg-black text-white font-sans overflow-y-auto selection:bg-indigo-500/30 relative">
+    <div className="min-h-screen w-full bg-black text-white font-sans overflow-y-auto overflow-x-hidden selection:bg-indigo-500/30 relative">
       
       {/* Background Ambience */}
       <div className="fixed inset-0 z-0 pointer-events-none ios26-gradient">
