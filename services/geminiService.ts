@@ -3,7 +3,8 @@ import { Message, ModelId } from "../types";
 import { SYSTEM_INSTRUCTION } from "../constants";
 
 const getClient = () => {
-  const apiKey = process.env.API_KEY;
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  
   if (!apiKey) {
     throw new Error("VITE_GEMINI_API_KEY is not set");
   }
@@ -18,13 +19,11 @@ export const streamChatResponse = async (
   try {
     const genAI = getClient();
     
-    // Get the generative model
     const model = genAI.getGenerativeModel({ 
       model: modelId,
       systemInstruction: SYSTEM_INSTRUCTION,
     });
 
-    // Transform messages to Gemini format
     const history = messages.slice(0, -1).map(m => ({
       role: m.role === 'model' ? 'model' : 'user',
       parts: [{ text: m.text }]
@@ -40,7 +39,6 @@ export const streamChatResponse = async (
 
     const lastMessage = messages[messages.length - 1].text;
     
-    // Stream the response
     const result = await chat.sendMessageStream(lastMessage);
 
     let fullText = "";
