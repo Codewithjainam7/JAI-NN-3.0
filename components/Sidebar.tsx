@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from './Icon';
 import { JAINNLogo } from './JAINNLogo';
 import { ChatSession, Tier, User } from '../types';
@@ -21,12 +22,12 @@ interface SidebarProps {
   isGuest: boolean;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ 
-  isOpen, 
-  sessions, 
-  currentSessionId, 
-  onNewChat, 
-  onSelectSession, 
+export const Sidebar: React.FC<SidebarProps> = ({
+  isOpen,
+  sessions,
+  currentSessionId,
+  onNewChat,
+  onSelectSession,
   onPricingOpen,
   onSettingsOpen,
   currentTier,
@@ -40,13 +41,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
-  const [actionMenuId, setActionMenuId] = useState<string | null>(null);
+  const [actionMenu, setActionMenu] = useState<{ id: string; rect: DOMRect } | null>(null);
+  const actionRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const onDocClick = (e: MouseEvent) => {
+      // close action menu when clicking outside
+      if (actionMenu && actionRef.current && !(actionRef.current as any).contains(e.target)) {
+        setActionMenu(null);
+      }
+    };
+    document.addEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', onDocClick);
+  }, [actionMenu]);
 
   const handleStartRename = (session: ChatSession, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingId(session.id);
     setEditTitle(session.title);
-    setActionMenuId(null);
+    setActionMenu(null);
   };
 
   const handleFinishRename = () => {
@@ -63,33 +76,67 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const handleDelete = (sessionId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if(window.confirm('Delete this chat permanently?')) {
+    if (window.confirm('Delete this chat permanently?')) {
       onDeleteSession(sessionId);
-      setActionMenuId(null);
+      setActionMenu(null);
     }
+  };
+
+  // portal menu render
+  const renderPortalMenu = () => {
+    if (!actionMenu) return null;
+    // prefer to place menu near the right side of viewport, but avoid going off-screen
+    const left = Math.min(document.documentElement.clientWidth - 170, actionMenu.rect.right - 160);
+    const top = actionMenu.rect.top + window.scrollY + 8;
+
+    const menu = (
+      <div
+        ref={actionRef}
+        className="fixed z-[9999] bg-black/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-1 min-w-[160px]"
+        style={{ left: `${left}px`, top: `${top}px` }}
+      >
+        <button
+          onClick={() => {
+            handleStartRename(sessions.find(s => s.id === actionMenu.id)!, new MouseEvent('click') as any);
+          }}
+          className="w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-white/5 flex items-center gap-2"
+        >
+          <Icon name="edit" size={14} />
+          Rename
+        </button>
+        <div className="h-px bg-white/6 my-1"></div>
+        <button
+          onClick={(e) => handleDelete(actionMenu.id, e as any)}
+          className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 flex items-center gap-2"
+        >
+          <Icon name="trash" size={14} />
+          Delete
+        </button>
+      </div>
+    );
+
+    return createPortal(menu, document.body);
   };
 
   return (
     <>
-      <div 
-        className={`fixed inset-y-0 left-0 z-40 bg-black/95 backdrop-blur-xl border-r border-white/10 transform transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] 
+      <div
+        className={`fixed inset-y-0 left-0 z-40 bg-black/95 backdrop-blur-xl border-r border-white/10 transform transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)]
           ${isOpen ? 'translate-x-0 w-80 max-w-[85vw]' : '-translate-x-full w-80'}
           md:relative md:flex-shrink-0
         `}
       >
         <div className={`flex flex-col h-full p-4 w-full ${!isOpen ? 'md:hidden' : ''}`}>
-          
           <div className="flex items-center justify-between mb-8 px-2 pt-2">
             <div className="flex items-center gap-3">
               <JAINNLogo size={32} />
               <h1 className="font-semibold text-lg text-white">JAI-NN 3.0</h1>
             </div>
-            
+
             <button onClick={onCloseMobile} className="md:hidden p-2 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors active:scale-95">
               <Icon name="x" size={20} />
             </button>
 
-            {/* Home always available */}
             <button onClick={onHome} className="p-2 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors active:scale-95" title="Back to Home">
               <div className="flex items-center gap-2">
                 <Icon name="home" size={20} />
@@ -98,10 +145,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           </div>
 
-          <button 
+          <button
             onClick={() => {
               onNewChat();
-              if(window.innerWidth < 768) onCloseMobile();
+              if (window.innerWidth < 768) onCloseMobile();
             }}
             className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500/20 to-purple-500/20 border border-blue-500/30 hover:border-blue-500/50 transition-colors mb-6 text-sm font-medium text-white shadow-sm active:scale-95"
           >
@@ -149,11 +196,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                         <button
                           onClick={() => {
                             onSelectSession(session.id);
-                            if(window.innerWidth < 768) onCloseMobile();
+                            if (window.innerWidth < 768) onCloseMobile();
                           }}
                           className={`w-full text-left px-4 py-3 rounded-xl text-sm transition-all duration-200 relative ${
-                            currentSessionId === session.id 
-                              ? 'bg-white/10 text-white font-medium shadow-md shadow-black/20' 
+                            currentSessionId === session.id
+                              ? 'bg-white/10 text-white font-medium shadow-md shadow-black/20'
                               : 'hover:bg-white/5 text-white/60 hover:text-white/90'
                           }`}
                         >
@@ -162,41 +209,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           </span>
                         </button>
 
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10">
-                          <button 
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 z-20">
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              setActionMenuId(actionMenuId === session.id ? null : session.id);
+                              const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                              setActionMenu({ id: session.id, rect });
                             }}
                             className="p-2 hover:bg-white/20 rounded-lg transition-colors active:scale-95 bg-white/10 backdrop-blur-sm border border-white/10"
                             title="Options"
                           >
                             <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-white">
-                              <circle cx="8" cy="3" r="1.5" fill="currentColor"/>
-                              <circle cx="8" cy="8" r="1.5" fill="currentColor"/>
-                              <circle cx="8" cy="13" r="1.5" fill="currentColor"/>
+                              <circle cx="8" cy="3" r="1.5" fill="currentColor" />
+                              <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+                              <circle cx="8" cy="13" r="1.5" fill="currentColor" />
                             </svg>
                           </button>
-
-                          {actionMenuId === session.id && (
-                            <div className="absolute right-0 top-full mt-1 bg-black/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-1 min-w-[140px] z-20">
-                              <button 
-                                onClick={(e) => handleStartRename(session, e)}
-                                className="w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-white/10 transition-colors flex items-center gap-2"
-                              >
-                                <Icon name="edit" size={14} />
-                                Rename
-                              </button>
-                              <div className="h-px bg-white/10 my-1"></div>
-                              <button 
-                                onClick={(e) => handleDelete(session.id, e)}
-                                className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2"
-                              >
-                                <Icon name="trash" size={14} />
-                                Delete
-                              </button>
-                            </div>
-                          )}
                         </div>
                       </div>
                     )}
@@ -207,21 +235,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           <div className="mt-auto pt-4 space-y-2 border-t border-white/10">
-            <button 
+            <button
               onClick={() => {
                 onSettingsOpen();
-                if(window.innerWidth < 768) onCloseMobile();
+                if (window.innerWidth < 768) onCloseMobile();
               }}
               className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-white/60 hover:text-white transition-colors text-sm font-medium active:scale-95"
             >
               <Icon name="settings" size={18} />
               {isGuest ? 'Sign In to Access Settings' : 'Settings'}
             </button>
-            
+
             {user && !isGuest && (
-              <button 
+              <button
                 onClick={() => {
-                  if(window.confirm('Sign out from JAI-NN 3.0?')) {
+                  if (window.confirm('Sign out from JAI-NN 3.0?')) {
                     onSignOut();
                   }
                 }}
@@ -232,10 +260,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </button>
             )}
 
-            <button 
+            <button
               onClick={() => {
                 onPricingOpen();
-                if(window.innerWidth < 768) onCloseMobile();
+                if (window.innerWidth < 768) onCloseMobile();
               }}
               className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gradient-to-r from-blue-900/40 to-purple-900/40 border border-white/10 hover:border-white/20 transition-all group shadow-lg shadow-blue-900/10 active:scale-95"
             >
@@ -254,13 +282,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
 
+      {/* softened overlay to avoid completely blacking out the background */}
       {isOpen && (
-        // mobile overlay softened so it's not a flat black block
-        <div 
+        <div
           className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm md:hidden"
           onClick={onCloseMobile}
-        ></div>
+        />
       )}
+
+      {renderPortalMenu()}
     </>
   );
 };
+
+export default Sidebar;
