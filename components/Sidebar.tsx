@@ -89,7 +89,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <Icon name="x" size={20} />
             </button>
 
-            {/* Show Home button on all sizes (icon + small label on larger screens) */}
+            {/* Home always available */}
             <button onClick={onHome} className="p-2 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors active:scale-95" title="Back to Home">
               <div className="flex items-center gap-2">
                 <Icon name="home" size={20} />
@@ -115,7 +115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <div className="text-xs font-medium text-white/40 px-4 mb-2 uppercase sticky top-0 bg-black/90 backdrop-blur-sm py-1 z-10">
               {isGuest ? 'Current Session' : 'History'}
             </div>
-            <div className="space-y-1">
+            <div className="space-y-1 pb-4">
               {isGuest ? (
                 <div className="px-4 py-8 text-center">
                   <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white/5 flex items-center justify-center text-white/20">
@@ -179,7 +179,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           </button>
 
                           {actionMenuId === session.id && (
-                            <div className="absolute right-0 top-full mt-1 bg-black/95 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-1 min-w-[140px] z-20">
+                            <div className="absolute right-0 top-full mt-1 bg-black/80 backdrop-blur-xl border border-white/10 rounded-xl shadow-2xl py-1 min-w-[140px] z-20">
                               <button 
                                 onClick={(e) => handleStartRename(session, e)}
                                 className="w-full px-3 py-2 text-left text-sm text-white/80 hover:bg-white/10 transition-colors flex items-center gap-2"
@@ -255,8 +255,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       {isOpen && (
+        // mobile overlay softened so it's not a flat black block
         <div 
-          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm md:hidden"
+          className="fixed inset-0 z-30 bg-black/40 backdrop-blur-sm md:hidden"
           onClick={onCloseMobile}
         ></div>
       )}
