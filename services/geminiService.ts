@@ -1,74 +1,128 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Message, ModelId } from '../types';
-
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-
-let genAI: GoogleGenerativeAI | null = null;
-if (API_KEY) {
-  genAI = new GoogleGenerativeAI(API_KEY);
-}
+// services/geminiService.ts
+// Client-side wrapper — NO server SDKs or keys here. Calls server endpoints /api/stream and /api/chat.
 
 export type GeminiErrorKind = 'quota' | 'rate_limit' | 'auth' | 'network' | 'unknown';
+export type GeminiError = { kind: GeminiErrorKind; message: string; status?: number; details?: any };
 
-export type GeminiError = {
-  kind: GeminiErrorKind;
-  message: string;
-  status?: number;
-  details?: any;
-};
-
-function convertMessagesToGemini(messages: Message[]) {
-  return messages.map(msg => ({
-    role: msg.role === 'model' ? 'model' : 'user',
-    parts: [{ text: msg.text }]
-  }));
+async function safeJsonResponse(res: Response) {
+  const txt = await res.text();
+  try { return JSON.parse(txt); } catch { return txt; }
 }
 
-function handleGeminiError(error: any): GeminiError {
-  const message = error?.message || String(error);
-  let kind: GeminiErrorKind = 'unknown';
-  
-  if (message.includes('API_KEY') || message.includes('401') || message.includes('403')) {
-    kind = 'auth';
-  } else if (message.includes('quota') || message.includes('429')) {
-    kind = 'quota';
-  } else if (message.includes('rate limit')) {
-    kind = 'rate_limit';
-  } else if (message.includes('fetch') || message.includes('network')) {
-    kind = 'network';
-  }
-  
-  return { kind, message, details: error };
+function inferKindFromMessage(msg = '', status?: number): GeminiErrorKind {
+  const lower = (msg || '').toLowerCase();
+  if (status === 401 || status === 403 || lower.includes('unauthorized') || lower.includes('permission')) return 'auth';
+  if (lower.includes('quota') || lower.includes('quota exceeded')) return 'quota';
+  if (lower.includes('rate') || status === 429) return 'rate_limit';
+  if (!status || status >= 500) return 'network';
+  return 'unknown';
 }
 
-export async function streamChatResponse(
-  messages: Message[],
-  modelId: ModelId,
-  onChunk: (text: string) => void
+/**
+ * Attempt to stream via /api/stream. If it returns non-2xx or no body, fallback to /api/chat.
+ * messages: Message[] (your App passes [...messages, userMsg])
+ * modelId: string (passed but forwarded to server)
+ * onChunk: called with text chunks (or full text on fallback)
+ */
+export function streamChatResponse(
+  messages: any[],
+  modelId: string,
+  onChunk: (text: string) => void,
+  opts?: { timeoutMs?: number }
 ) {
-  if (!genAI) {
-    throw handleGeminiError(new Error('Gemini API not configured. Please add VITE_GEMINI_API_KEY to your .env.local file'));
-  }
+  let aborted = false;
+  const controller = new AbortController();
 
-  try {
-    const model = genAI.getGenerativeModel({ model: modelId });
-    const history = convertMessagesToGemini(messages.slice(0, -1));
-    const lastMessage = messages[messages.length - 1].text;
+  const cancel = () => {
+    aborted = true;
+    try { controller.abort(); } catch {}
+  };
 
-    const chat = model.startChat({ history });
-    const result = await chat.sendMessageStream(lastMessage);
+  const done = (async () => {
+    // Primary: attempt streaming endpoint which should stream chunks (if your server supports it)
+    try {
+      const res = await fetch('/api/stream', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages, modelId }),
+        signal: controller.signal,
+        credentials: 'include'
+      });
 
-    let fullText = '';
-    for await (const chunk of result.stream) {
-      const chunkText = chunk.text();
-      fullText += chunkText;
-      onChunk(fullText);
+      if (!res.ok) {
+        const payload = await safeJsonResponse(res);
+        const message = (payload && (payload.error || payload.message)) || res.statusText || 'Stream error';
+        const kind = inferKindFromMessage(String(message), res.status);
+        const err: GeminiError = { kind, message: String(message), status: res.status, details: payload };
+        // If quota/auth, surface without fallback (fatal until fixed)
+        if (err.kind === 'quota' || err.kind === 'auth') throw err;
+        // otherwise fallthrough to fallback
+        throw err;
+      }
+
+      // If response has no body, fallback
+      if (!res.body) throw new Error('No streaming body, falling back to non-stream endpoint');
+
+      // Read stream chunks and call onChunk with raw chunk text
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let full = '';
+
+      while (true) {
+        const { value, done: readerDone } = await reader.read();
+        if (readerDone) break;
+        if (value) {
+          const textChunk = decoder.decode(value, { stream: true });
+          full += textChunk;
+          try { onChunk(textChunk); } catch (e) { console.warn('onChunk callback error', e); }
+        }
+      }
+
+      return { ok: true, streamed: true, result: full };
+    } catch (err: any) {
+      if (aborted) {
+        const ge: GeminiError = { kind: 'network', message: 'Stream aborted by user', details: err };
+        throw ge;
+      }
+
+      // If error was quota/auth from server, rethrow so UI can show proper banner
+      if (err && (err as GeminiError)?.kind) {
+        throw err;
+      }
+
+      // Fallback to non-streaming /api/chat
+      try {
+        const res2 = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages, modelId }),
+          signal: controller.signal,
+          credentials: 'include'
+        });
+
+        if (!res2.ok) {
+          const payload = await safeJsonResponse(res2);
+          const message = (payload && (payload.error || payload.message)) || res2.statusText || 'Chat endpoint error';
+          const kind = inferKindFromMessage(String(message), res2.status);
+          const ge: GeminiError = { kind, message: String(message), status: res2.status, details: payload };
+          throw ge;
+        }
+
+        const data = await safeJsonResponse(res2);
+        // server should return { ok: true, result: "...text..." } or just text
+        const final = (data && data.ok && data.result) ? data.result : (data?.result ?? data);
+        const text = typeof final === 'string' ? final : JSON.stringify(final);
+        try { onChunk(text); } catch (e) {}
+        return { ok: true, streamed: false, result: final };
+      } catch (finalErr: any) {
+        // Normalize and rethrow
+        const ge: GeminiError = (finalErr && finalErr.kind) ? finalErr : { kind: 'unknown', message: finalErr?.message || String(finalErr), details: finalErr };
+        throw ge;
+      }
     }
+  })();
 
-    return fullText;
-  } catch (error: any) {
-    throw handleGeminiError(error);
-  }
+  return { done, cancel };
 }
 
 export function isGeminiError(e: any): e is GeminiError {
