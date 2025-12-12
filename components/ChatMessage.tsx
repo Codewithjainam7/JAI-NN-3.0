@@ -48,14 +48,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = memo(({ message, onRegene
   };
 
   return (
-    <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} animate-slide-up mb-4`}>
-      <div className={`flex flex-col w-full ${isUser ? 'items-end max-w-[85%]' : 'items-start max-w-[90%]'} sm:max-w-[75%]`}>
+    // Container aligns messages; use w-full but bubble itself uses inline/w-fit so it shrinks to content
+    <div className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'} animate-slide-up mb-4 px-2 sm:px-0`}>
+      <div className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} max-w-[92%]`}>
         
         {/* Avatar & Name */}
         <div className="flex items-center gap-2 mb-2 px-1">
           {!isUser && (
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center flex-shrink-0 p-0.5">
-              <JAINNLogo size={20} />
+              <JAINNLogo size={18} />
             </div>
           )}
           <span className="text-[11px] text-white/50 font-medium font-mono tracking-wide">
@@ -68,10 +69,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = memo(({ message, onRegene
           )}
         </div>
 
-        {/* Message Bubble - iOS 26 Style */}
+        {/* Message Bubble */}
         <div 
           className={`
-            relative px-4 py-3 transition-all w-full chat-message
+            relative px-4 py-3 transition-all chat-message inline-block w-fit
             ${isUser 
               ? 'rounded-[22px] rounded-br-md shadow-lg shadow-blue-500/10' 
               : 'rounded-[22px] rounded-bl-md shadow-xl smoked-glass'
@@ -80,9 +81,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = memo(({ message, onRegene
           style={{
             background: isUser ? `linear-gradient(135deg, ${accentColor}20 0%, ${accentColor}08 100%)` : undefined,
             borderLeft: isUser ? `2px solid ${accentColor}` : undefined,
-            maxWidth: '100%',
+            maxWidth: '85vw',
             wordWrap: 'break-word',
             overflowWrap: 'break-word',
+            display: 'inline-block'
           }}
         >
           <div className="prose prose-invert prose-sm max-w-none" style={{ maxWidth: '100%' }}>
@@ -140,42 +142,30 @@ export const ChatMessage: React.FC<ChatMessageProps> = memo(({ message, onRegene
                   ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-1 ml-2">{children}</ol>,
                   li: ({ children }) => <li className="text-sm text-white/85">{children}</li>,
                   blockquote: ({ children }) => (
-                    <blockquote className="border-l-2 border-white/30 pl-3 italic text-white/60 my-2">
-                      {children}
-                    </blockquote>
-                  ),
-                  strong: ({ children }) => <strong className="font-semibold text-white">{children}</strong>,
-                  em: ({ children }) => <em className="italic text-white/90">{children}</em>,
+                    <blockquote className="pl-4 border-l-2 border-white/10 italic text-white/70">{children}</blockquote>
+                  )
                 }}
               >
                 {message.text}
               </ReactMarkdown>
             )}
           </div>
-        </div>
-        
-        {/* Actions */}
-        {!isUser && !message.isThinking && (
-          <div className="flex items-center gap-1.5 mt-2 px-1 md:opacity-0 md:group-hover:opacity-100 opacity-100 transition-opacity">
-            <button 
-              onClick={handleCopyAll} 
-              className="p-2 rounded-xl ios-glass hover:bg-white/15 transition-all active:scale-95" 
-              title="Copy"
-            >
-              <Icon name={isCopied ? "check" : "copy"} size={13} className={isCopied ? 'text-green-400' : ''} />
+
+          {/* Actions */}
+          <div className="absolute -bottom-5 right-3 flex items-center gap-2">
+            <button onClick={handleCopyAll} className="p-1 rounded-full bg-white/5 hover:bg-white/10 text-white/60 text-xs">
+              {isCopied ? <Icon name="check" size={12} /> : <Icon name="copy" size={12} />}
             </button>
-            <button 
-              onClick={onRegenerate} 
-              className="p-2 rounded-xl ios-glass hover:bg-white/15 transition-all active:scale-95" 
-              title="Regenerate"
-            >
-              <Icon name="refresh" size={13} />
-            </button>
+            {!isUser && (
+              <button onClick={onRegenerate} className="p-1 rounded-full bg-white/5 hover:bg-white/10 text-white/60 text-xs">
+                <Icon name="refresh" size={12} />
+              </button>
+            )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
 });
 
-ChatMessage.displayName = 'ChatMessage';
+export default ChatMessage;
