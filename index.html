@@ -32,6 +32,7 @@
               'pulse-slow': 'pulse 4s ease-in-out infinite',
               'scroll-infinite': 'scrollInfinite 20s linear infinite',
               'glow-pulse': 'glowPulse 2s ease-in-out infinite',
+              'marquee': 'marquee 12s linear infinite'
             },
             keyframes: {
               float: {
@@ -58,6 +59,10 @@
                 '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
                 '50%': { opacity: '0.6', transform: 'scale(1.05)' },
               },
+              marquee: {
+                '0%': { transform: 'translateX(0%)' },
+                '100%': { transform: 'translateX(-50%)' }
+              }
             },
           },
         },
@@ -75,7 +80,6 @@
         padding: 0;
         height: 100%;
         width: 100%;
-        overflow: hidden;
       }
 
       body {
@@ -85,7 +89,10 @@
         -moz-osx-font-smoothing: grayscale;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
         overscroll-behavior: none;
-        position: fixed;
+        /* allow page to scroll normally so chat, landing and sidebars render correctly */
+        position: relative;
+        min-height: 100vh;
+        overflow-y: auto;
         touch-action: pan-x pan-y;
       }
 
@@ -93,15 +100,9 @@
         padding-bottom: max(env(safe-area-inset-bottom), 0.75rem);
       }
 
-      html {
-        position: fixed;
-        height: 100%;
-        overflow: hidden;
-      }
-
       ::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
+        width: 8px;
+        height: 8px;
       }
 
       ::-webkit-scrollbar-track {
@@ -109,12 +110,12 @@
       }
 
       ::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.12);
         border-radius: 10px;
       }
 
       ::-webkit-scrollbar-thumb:hover {
-        background: rgba(255, 255, 255, 0.3);
+        background: rgba(255, 255, 255, 0.2);
       }
 
       @media (max-width: 768px) {
@@ -138,17 +139,17 @@
       }
 
       .ios-glass {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(40px) saturate(180%);
-        -webkit-backdrop-filter: blur(40px) saturate(180%);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.04);
+        backdrop-filter: blur(28px) saturate(160%);
+        -webkit-backdrop-filter: blur(28px) saturate(160%);
+        border: 1px solid rgba(255, 255, 255, 0.06);
       }
 
       .smoked-glass {
-        background: rgba(0, 0, 0, 0.6);
-        backdrop-filter: blur(60px) saturate(200%);
-        -webkit-backdrop-filter: blur(60px) saturate(200%);
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        backdrop-filter: blur(40px) saturate(200%);
+        -webkit-backdrop-filter: blur(40px) saturate(200%);
+        border: 1px solid rgba(255, 255, 255, 0.06);
       }
 
       .bg-clip-text {
@@ -162,8 +163,8 @@
       }
 
       .loading-spinner {
-        border: 2px solid rgba(255, 255, 255, 0.1);
-        border-top: 2px solid #ffffff;
+        border: 2px solid rgba(255, 255, 255, 0.08);
+        border-top: 2px solid rgba(255,255,255,0.7);
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
       }
@@ -199,10 +200,24 @@
       /* iOS 26 Theme Gradient Background */
       .ios26-gradient {
         background: 
-          radial-gradient(circle at 20% 30%, rgba(10, 132, 255, 0.15) 0%, transparent 50%),
-          radial-gradient(circle at 80% 60%, rgba(94, 92, 230, 0.12) 0%, transparent 50%),
-          radial-gradient(circle at 40% 80%, rgba(10, 132, 255, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 20% 30%, rgba(10, 132, 255, 0.12) 0%, transparent 50%),
+          radial-gradient(circle at 80% 60%, rgba(94, 92, 230, 0.08) 0%, transparent 50%),
+          radial-gradient(circle at 40% 80%, rgba(10, 132, 255, 0.06) 0%, transparent 50%),
           #000000;
+      }
+
+      /* Marquee styling for EVOLUTION */
+      .marquee {
+        overflow: hidden;
+        white-space: nowrap;
+        display: block;
+      }
+      .marquee-track {
+        display: inline-block;
+        padding-left: 100%;
+        animation: marquee linear infinite;
+        animation-duration: 14s;
+        will-change: transform;
       }
     </style>
   </head>
