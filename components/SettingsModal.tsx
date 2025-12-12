@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { UserSettings, Tier, User } from '../types';
 import { Icon } from './Icon';
 
@@ -33,6 +33,20 @@ const DEFAULT_PROMPTS = [
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings, onUpdateSettings, user }) => {
   const [customPrompts, setCustomPrompts] = useState<string[]>(settings.customStarters || DEFAULT_PROMPTS);
   const [newPrompt, setNewPrompt] = useState('');
+  const [displayName, setDisplayName] = useState(settings.displayName || (user?.name || ''));
+  const [signature, setSignature] = useState(settings.signature || '');
+  const [language, setLanguage] = useState(settings.language || 'en');
+  const [timezone, setTimezone] = useState(settings.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(settings.avatarUrl || null);
+
+  useEffect(() => {
+    setCustomPrompts(settings.customStarters || DEFAULT_PROMPTS);
+    setDisplayName(settings.displayName || (user?.name || ''));
+    setSignature(settings.signature || '');
+    setLanguage(settings.language || 'en');
+    setTimezone(settings.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC');
+    setAvatarPreview(settings.avatarUrl || null);
+  }, [settings, user]);
 
   if (!isOpen) return null;
 
@@ -55,40 +69,86 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
     onUpdateSettings({ customStarters: updated });
   };
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const url = String(reader.result || '');
+      setAvatarPreview(url);
+      // Save preview url to settings; real upload should be handled by backend separately
+      onUpdateSettings({ avatarUrl: url });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSaveBasic = () => {
+    onUpdateSettings({
+      displayName: displayName.trim(),
+      signature: signature.trim(),
+      language,
+      timezone
+    });
+    onClose();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={onClose}></div>
       <div className="relative w-full max-w-2xl smoked-glass rounded-3xl p-6 sm:p-8 animate-slide-up max-h-[90vh] overflow-y-auto custom-scrollbar shadow-[0_0_50px_rgba(10,132,255,0.1)] border border-white/10">
         
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/10">
+        <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/10">
             <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-3">
                 <Icon name="settings" size={20} className="text-blue-400" />
                 Settings
             </h2>
-            <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors">
-                <Icon name="x" size={20} />
-            </button>
+            <div className="flex items-center gap-3">
+              <button onClick={handleSaveBasic} className="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-sm">Save</button>
+              <button onClick={onClose} className="p-2 rounded-full hover:bg-white/10 text-white/40 transition-colors">
+                <Icon name="x" size={18} />
+              </button>
+            </div>
         </div>
 
-        {/* User Identity */}
-        <div className="mb-8">
+        {/* User Identity / Personalization */}
+        <div className="mb-6">
             <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">Profile</h3>
-            <div className="flex items-center gap-4 p-5 rounded-2xl bg-white/5 border border-white/10">
-                <div className="w-14 h-14 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold text-xl shadow-lg">
-                    {user ? user.name.charAt(0).toUpperCase() : 'G'}
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
+                <div className="w-14 h-14 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-500 text-white font-bold text-xl shadow-lg overflow-hidden">
+                    {avatarPreview ? (
+                      <img src={avatarPreview} alt="avatar" className="w-full h-full object-cover" />
+                    ) : (
+                      (user ? user.name.charAt(0).toUpperCase() : 'G')
+                    )}
                 </div>
                 <div className="flex-1">
-                    <div className="font-bold text-white">{user ? user.name : 'GUEST USER'}</div>
-                    <div className="text-xs text-white/40">{user ? user.email : 'ID: ANONYMOUS'}</div>
-                    <span className="inline-block mt-2 px-3 py-1 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-[10px] font-bold text-blue-400 tracking-wider">
-                        {settings.tier} TIER
-                    </span>
+                    <input
+                      type="text"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Display name"
+                      className="w-full bg-black/50 border border-white/10 rounded-xl p-2 text-sm text-white placeholder-white/30 outline-none mb-2"
+                    />
+                    <input
+                      type="text"
+                      value={signature}
+                      onChange={(e) => setSignature(e.target.value)}
+                      placeholder="Signature (shown in exports)"
+                      className="w-full bg-black/50 border border-white/10 rounded-xl p-2 text-sm text-white placeholder-white/30 outline-none"
+                    />
+                    <div className="flex items-center gap-2 mt-2 text-xs text-white/40">
+                      <label className="flex items-center gap-2">
+                        <input type="file" accept="image/*" onChange={handleAvatarChange} className="hidden" id="avatar-upload" />
+                        <button onClick={() => document.getElementById('avatar-upload')?.click()} className="px-3 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-white text-xs">Upload Avatar</button>
+                      </label>
+                      <span>Preferred name and small signature that will appear on exported chat logs.</span>
+                    </div>
                 </div>
             </div>
         </div>
 
         {/* Accent Colors */}
-        <div className="mb-8">
+        <div className="mb-6">
             <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">Accent Color</h3>
             <div className="grid grid-cols-3 gap-3">
                 {ACCENT_COLORS.map(color => {
@@ -120,8 +180,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
             </div>
         </div>
 
+        {/* Personalization - Language / Timezone */}
+        <div className="mb-6">
+            <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">Personalization</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-white/60 mb-2 block">Language</label>
+                  <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl p-2 text-sm text-white outline-none">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="zh">Chinese</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs text-white/60 mb-2 block">Timezone</label>
+                  <input value={timezone} onChange={(e) => setTimezone(e.target.value)} className="w-full bg-black/50 border border-white/10 rounded-xl p-2 text-sm text-white outline-none" />
+                </div>
+            </div>
+        </div>
+
         {/* Response Style */}
-        <div className="mb-8">
+        <div className="mb-6">
             <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">Response Style</h3>
             <div className="grid grid-cols-2 gap-3">
                 {[
@@ -147,77 +229,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
             </div>
         </div>
 
-        {/* Behavior Toggles */}
-        <div className="mb-8">
-            <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">Preferences</h3>
-            <div className="space-y-3">
-                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
-                    <div className="flex items-center gap-3">
-                        <Icon name="download" size={18} className="text-white/60" />
-                        <div>
-                            <div className="font-medium text-sm text-white">Auto-save Chats</div>
-                            <div className="text-xs text-white/40">Save conversations automatically</div>
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => onUpdateSettings({ autoSaveChats: !settings.autoSaveChats })}
-                        className={`w-12 h-6 rounded-full transition-colors relative ${
-                            settings.autoSaveChats !== false ? 'bg-blue-500' : 'bg-white/20'
-                        }`}
-                    >
-                        <div className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform ${
-                            settings.autoSaveChats !== false ? 'translate-x-6' : 'translate-x-0.5'
-                        }`}></div>
-                    </button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
-                    <div className="flex items-center gap-3">
-                        <Icon name="volume" size={18} className="text-white/60" />
-                        <div>
-                            <div className="font-medium text-sm text-white">Sound Effects</div>
-                            <div className="text-xs text-white/40">Play interaction sounds</div>
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => onUpdateSettings({ soundEffects: !settings.soundEffects })}
-                        className={`w-12 h-6 rounded-full transition-colors relative ${
-                            settings.soundEffects ? 'bg-blue-500' : 'bg-white/20'
-                        }`}
-                    >
-                        <div className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform ${
-                            settings.soundEffects ? 'translate-x-6' : 'translate-x-0.5'
-                        }`}></div>
-                    </button>
-                </div>
-
-                <div className="flex items-center justify-between p-4 rounded-xl bg-white/5 border border-white/10">
-                    <div className="flex items-center gap-3">
-                        <Icon name="panel-left" size={18} className="text-white/60" />
-                        <div>
-                            <div className="font-medium text-sm text-white">Compact Mode</div>
-                            <div className="text-xs text-white/40">Reduce spacing and padding</div>
-                        </div>
-                    </div>
-                    <button
-                        onClick={() => onUpdateSettings({ compactMode: !settings.compactMode })}
-                        className={`w-12 h-6 rounded-full transition-colors relative ${
-                            settings.compactMode ? 'bg-blue-500' : 'bg-white/20'
-                        }`}
-                    >
-                        <div className={`absolute w-5 h-5 bg-white rounded-full top-0.5 transition-transform ${
-                            settings.compactMode ? 'translate-x-6' : 'translate-x-0.5'
-                        }`}></div>
-                    </button>
-                </div>
-            </div>
-        </div>
-
         {/* System Instructions */}
-        <div className="mb-8">
+        <div className="mb-6">
             <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">System Instructions</h3>
             
-            <div className={`p-5 rounded-2xl border transition-all ${canUseSystemInstructions ? 'bg-white/5 border-white/10' : 'bg-transparent border-white/5 opacity-60'}`}>
+            <div className={`p-4 rounded-2xl border transition-all ${canUseSystemInstructions ? 'bg-white/5 border-white/10' : 'bg-transparent border-white/5 opacity-60'}`}>
                 <div className="flex justify-between items-center mb-3">
                     <label className="text-sm font-medium text-white/70">Custom AI Behavior</label>
                     {!canUseSystemInstructions && (
@@ -232,19 +248,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
                     value={settings.systemInstruction || ''}
                     onChange={(e) => onUpdateSettings({ systemInstruction: e.target.value })}
                     placeholder={canUseSystemInstructions ? "e.g., You are a helpful coding assistant that explains concepts clearly..." : "Upgrade to Pro to customize AI personality and behavior"}
-                    className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white/80 placeholder-white/20 outline-none h-32 resize-none focus:border-blue-500/50 transition-colors"
+                    className="w-full bg-black/50 border border-white/10 rounded-xl p-3 text-sm text-white/80 placeholder-white/20 outline-none h-28 resize-none focus:border-blue-500/50 transition-colors"
                 />
             </div>
         </div>
 
-        {/* Custom Prompts */}
-        <div className="mb-8">
+        {/* Quick Prompts */}
+        <div className="mb-6">
             <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-4">Quick Start Prompts</h3>
             
-            <div className={`p-5 rounded-2xl border transition-all ${canUseCustomPrompts ? 'bg-white/5 border-white/10' : 'bg-transparent border-white/5 opacity-60'}`}>
+            <div className={`p-4 rounded-2xl border transition-all ${canUseCustomPrompts ? 'bg-white/5 border-white/10' : 'bg-transparent border-white/5 opacity-60'}`}>
                 {canUseCustomPrompts ? (
                     <>
-                        <div className="flex gap-2 mb-4">
+                        <div className="flex gap-2 mb-3">
                             <input 
                                 type="text"
                                 value={newPrompt}
@@ -259,11 +275,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
                                 disabled={!newPrompt.trim() || customPrompts.length >= 10}
                                 className="px-4 py-2 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transition-all"
                             >
-                                <Icon name="plus" size={16} />
+                                <Icon name="plus" size={14} />
                             </button>
                         </div>
                         
-                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                        <div className="space-y-2 max-h-40 overflow-y-auto">
                             {customPrompts.map((prompt, i) => (
                                 <div key={i} className="flex items-center gap-2 bg-black/30 rounded-lg px-3 py-2 group">
                                     <span className="flex-1 text-sm text-white/70 truncate">{prompt}</span>
@@ -288,12 +304,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, s
         </div>
 
         {/* Save Button */}
-        <button 
-            onClick={onClose} 
-            className="w-full py-3 rounded-xl font-bold tracking-wide transition-all bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-lg hover:shadow-blue-500/30"
-        >
-            Save Changes
-        </button>
+        <div className="mt-4">
+          <button 
+              onClick={handleSaveBasic} 
+              className="w-full py-3 rounded-xl font-bold tracking-wide transition-all bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-lg hover:shadow-blue-500/30"
+          >
+              Save Changes
+          </button>
+        </div>
       </div>
     </div>
   );
