@@ -108,10 +108,23 @@ const App: React.FC = () => {
     if (!supabase) return;
     
     try {
+      // Fixed: Use upsert with onConflict to avoid 409 errors
       const { data, error } = await supabase
         .from('user_settings')
-        .select('*')
-        .eq('user_id', userId)
+        .upsert(
+          { 
+            user_id: userId,
+            daily_image_count: 0,
+            daily_token_usage: 0,
+            tier: Tier.Free,
+            updated_at: new Date().toISOString()
+          },
+          { 
+            onConflict: 'user_id',
+            ignoreDuplicates: false 
+          }
+        )
+        .select()
         .single();
 
       if (data && !error) {
@@ -151,6 +164,8 @@ const App: React.FC = () => {
         daily_token_usage: settings.dailyTokenUsage,
         tier: settings.tier,
         updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
       });
     } catch (err) {
       console.error('Error saving settings:', err);
@@ -282,8 +297,15 @@ const App: React.FC = () => {
       });
       const responseTokens = Math.ceil(50 * 0.25);
       setSettings(prev => ({ ...prev, dailyTokenUsage: prev.dailyTokenUsage + responseTokens })); 
-    } catch {
-      setMessages(p => p.map(m => m.id === aiId ? { ...m, text: 'Connection error. Please try again.', isThinking: false } : m));
+    } catch (error: any) {
+      let errorMsg = 'Connection error. Please try again.';
+      
+      // Handle rate limiting
+      if (error?.message?.includes('429') || error?.message?.includes('quota')) {
+        errorMsg = '⚠️ API rate limit reached. Please wait a moment and try again.';
+      }
+      
+      setMessages(p => p.map(m => m.id === aiId ? { ...m, text: errorMsg, isThinking: false } : m));
     } finally { 
       setIsGenerating(false); 
     }
