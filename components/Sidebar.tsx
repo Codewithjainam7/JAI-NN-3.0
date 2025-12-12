@@ -89,8 +89,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <Icon name="x" size={20} />
             </button>
 
-            <button onClick={onHome} className="hidden md:flex p-2 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors active:scale-95" title="Back to Home">
-              <Icon name="home" size={20} />
+            {/* Show Home button on all sizes (icon + small label on larger screens) */}
+            <button onClick={onHome} className="p-2 rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-colors active:scale-95" title="Back to Home">
+              <div className="flex items-center gap-2">
+                <Icon name="home" size={20} />
+                <span className="hidden sm:inline text-sm">Home</span>
+              </div>
             </button>
           </div>
 
